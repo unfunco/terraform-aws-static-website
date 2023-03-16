@@ -13,21 +13,21 @@
 // limitations under the License.
 
 output "bucket_arn" {
-  description = ""
+  description = "The ARN of the S3 bucket."
   value       = aws_s3_bucket.this.arn
 }
 
 output "bucket_id" {
-  description = ""
+  description = "The ID of the S3 bucket."
   value       = aws_s3_bucket.this.id
 }
 
 output "cloudfront_distribution_id" {
-  description = ""
+  description = "The CloudFront distribution ID."
   value       = aws_cloudfront_distribution.this[0].id
 }
 
 output "cloudfront_domain_name" {
-  description = ""
+  description = "The CloudFront domain name."
   value       = aws_cloudfront_distribution.this[0].domain_name
 }
