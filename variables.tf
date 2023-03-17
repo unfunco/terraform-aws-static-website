@@ -24,6 +24,12 @@ variable "bucket_name_logs" {
   type        = string
 }
 
+variable "create_certificate" {
+  default     = true
+  description = "A flag to enable/disable the creation of an ACM certificate."
+  type        = bool
+}
+
 variable "create_cloudfront_distribution" {
   default     = true
   description = "A flag to enable/disable the creation of a CloudFront distribution."

@@ -22,6 +22,18 @@ resource "random_pet" "secret_user_agent" {
   separator = "-"
 }
 
+resource "aws_acm_certificate" "this" {
+  count = var.create_certificate ? 1 : 0
+
+  domain_name       = local.domain_name
+  provider          = aws.us_east_1
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "aws_s3_bucket" "this" {
   bucket        = var.bucket_name == "" ? local.domain_name : var.bucket_name
   force_destroy = true
@@ -38,7 +50,7 @@ resource "aws_s3_bucket_logging" "this" {
 
   bucket        = aws_s3_bucket.this.id
   target_bucket = var.bucket_name_logs == "" ? aws_s3_bucket.logs[0].id : var.bucket_name_logs
-  target_prefix = "s3-logs/"
+  target_prefix = "s3/"
 }
 
 resource "aws_s3_bucket_policy" "this" {
@@ -119,6 +131,7 @@ resource "aws_s3_bucket_versioning" "logs" {
 resource "aws_cloudfront_distribution" "this" {
   count = var.create_cloudfront_distribution ? 1 : 0
 
+  aliases             = [local.domain_name]
   comment             = "CloudFront distribution for ${aws_s3_bucket.this.id}."
   default_root_object = var.index_document
   enabled             = true
@@ -182,7 +195,9 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn            = aws_acm_certificate.this[0].arn
+    cloudfront_default_certificate = !var.create_certificate
     minimum_protocol_version       = "TLSv1"
+    ssl_support_method             = "sni-only"
   }
 }
