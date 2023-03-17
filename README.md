@@ -1,6 +1,8 @@
 # terraform-aws-static-website
 
-## Getting started
+Terraform module for creating a static website on AWS.
+
+## 🔨 Getting started
 
 ### Requirements
 
@@ -13,7 +15,7 @@ provider "aws" {
   region = var.region
 }
 
-module "static_website" {
+module "website" {
   source  = "registry.terraform.io/unfunco/static-website/aws"
   version = "0.1.0"
 

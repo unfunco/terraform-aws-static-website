@@ -17,16 +17,13 @@ locals {
   domain_name = lower(var.domain_name)
 }
 
-resource "aws_s3_bucket" "this" {
-  bucket        = var.bucket_name == "" ? local.domain_name : var.bucket_name
-  force_destroy = true
-  tags          = var.tags
+resource "random_pet" "secret_user_agent" {
+  length    = 4
+  separator = "-"
 }
 
-resource "aws_s3_bucket" "logs" {
-  count = var.enable_logging && var.create_log_bucket ? 1 : 0
-
-  bucket        = var.bucket_name_logs == "" ? join("-", [aws_s3_bucket.this.id, "logs"]) : var.bucket_name_logs
+resource "aws_s3_bucket" "this" {
+  bucket        = var.bucket_name == "" ? local.domain_name : var.bucket_name
   force_destroy = true
   tags          = var.tags
 }
@@ -40,16 +37,13 @@ resource "aws_s3_bucket_logging" "this" {
   count = var.enable_logging ? 1 : 0
 
   bucket        = aws_s3_bucket.this.id
-  target_bucket = var.bucket_name_logs == "" ? join("-", [aws_s3_bucket.this.id, "logs"]) : var.bucket_name_logs
+  target_bucket = var.bucket_name_logs == "" ? aws_s3_bucket.logs[0].id : var.bucket_name_logs
   target_prefix = "s3-logs/"
 }
 
-resource "aws_s3_bucket_public_access_block" "this" {
-  block_public_acls       = true
-  block_public_policy     = true
-  bucket                  = aws_s3_bucket.this.id
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+resource "aws_s3_bucket_policy" "this" {
+  bucket = aws_s3_bucket.this.id
+  policy = data.aws_iam_policy_document.this.json
 }
 
 resource "aws_s3_bucket_versioning" "this" {
@@ -72,10 +66,54 @@ resource "aws_s3_bucket_website_configuration" "this" {
   }
 }
 
-resource "aws_cloudfront_origin_access_identity" "this" {
-  count = var.create_cloudfront_distribution ? 1 : 0
+resource "aws_s3_bucket" "logs" {
+  count = var.enable_logging && var.create_log_bucket ? 1 : 0
 
-  comment = "CloudFront OAI for the ${aws_s3_bucket.this.id} S3 bucket."
+  bucket        = var.bucket_name_logs == "" ? join("-", [aws_s3_bucket.this.id, "logs"]) : var.bucket_name_logs
+  force_destroy = true
+  tags          = var.tags
+}
+
+resource "aws_s3_bucket_acl" "logs" {
+  count = var.enable_logging && var.create_log_bucket ? 1 : 0
+
+  acl    = "log-delivery-write"
+  bucket = aws_s3_bucket.logs[0].id
+}
+
+resource "aws_s3_bucket_public_access_block" "logs" {
+  count = var.enable_logging && var.create_log_bucket ? 1 : 0
+
+  block_public_acls       = true
+  block_public_policy     = true
+  bucket                  = aws_s3_bucket.logs[0].id
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+  count = var.enable_logging && var.create_log_bucket ? 1 : 0
+
+  bucket = aws_s3_bucket.logs[0].id
+
+  rule {
+    id     = "logs"
+    status = "Enabled"
+
+    expiration {
+      days = 365
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "logs" {
+  count = var.enable_logging && var.create_log_bucket ? 1 : 0
+
+  bucket = aws_s3_bucket.logs[0].id
+
+  versioning_configuration {
+    status = "Suspended"
+  }
 }
 
 resource "aws_cloudfront_distribution" "this" {
@@ -115,17 +153,25 @@ resource "aws_cloudfront_distribution" "this" {
     for_each = var.enable_logging ? [1] : []
 
     content {
-      bucket = var.bucket_name
-      prefix = "cloudfront-logs/"
+      bucket = aws_s3_bucket.logs[0].bucket_regional_domain_name
+      prefix = "cloudfront/"
     }
   }
 
   origin {
-    domain_name = aws_s3_bucket.this.bucket_regional_domain_name
+    domain_name = aws_s3_bucket_website_configuration.this.website_endpoint
     origin_id   = aws_s3_bucket.this.id
 
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.this[0].cloudfront_access_identity_path
+    custom_header {
+      name  = "User-Agent"
+      value = random_pet.secret_user_agent.id
+    }
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
 
@@ -137,5 +183,6 @@ resource "aws_cloudfront_distribution" "this" {
 
   viewer_certificate {
     cloudfront_default_certificate = true
+    minimum_protocol_version       = "TLSv1"
   }
 }

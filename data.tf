@@ -12,7 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
+data "aws_iam_policy_document" "this" {
+  statement {
+    actions   = ["s3:GetObject"]
+    effect    = "Allow"
+    resources = ["arn:aws:s3:::${aws_s3_bucket.this.id}/*"]
+
+    condition {
+      test     = "StringEquals"
+      values   = [random_pet.secret_user_agent.id]
+      variable = "aws:UserAgent"
+    }
+
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+  }
 }
