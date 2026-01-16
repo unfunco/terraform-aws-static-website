@@ -8,12 +8,12 @@ on:
 jobs:
   verify:
     name: Verify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.14.0
     - name: Initialise with no backend
