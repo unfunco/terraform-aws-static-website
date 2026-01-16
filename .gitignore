@@ -11,6 +11,7 @@ Thumbs.db
 *.tfvars.json
 *_override.tf
 *_override.tf.json
+.terraform.lock.hcl
 .terraformrc
 crash.*.log
 crash.log
