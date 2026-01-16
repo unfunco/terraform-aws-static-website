@@ -1,13 +1,14 @@
 # terraform-aws-static-website
 
-Terraform module for creating a static website on [AWS] using [S3] and
-[CloudFront].
+Terraform module for [AWS] static website hosting with [S3], [CloudFront] CDN,
+automatic SSL/TLS certificates, HTTP/3, IPv6, and secure defaults using
+[Origin Access Control] (OAC).
 
 ## Getting started
 
 ### Requirements
 
-- [Terraform] 1.14+
+- [Terraform] 1.14+ and the [AWS provider] 6.0+
 
 ### Installation and usage
 
@@ -26,8 +27,10 @@ module "website" {
 Made available under the terms of the [MIT License].
 
 [aws]: https://aws.amazon.com
+[aws provider]: https://registry.terraform.io/providers/hashicorp/aws
 [cloudfront]: https://aws.amazon.com/cloudfront
 [daniel morris]: https://unfun.co
 [mit license]: LICENSE.md
+[origin access control]: https://aws.amazon.com/blogs/networking-and-content-delivery/amazon-cloudfront-introduces-origin-access-control-oac/
 [s3]: https://aws.amazon.com/s3
 [terraform]: https://terraform.io
