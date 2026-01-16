@@ -1,22 +1,19 @@
 # terraform-aws-static-website
 
-Terraform module for creating a static website on AWS.
+Terraform module for creating a static website on [AWS] using [S3] and
+[CloudFront].
 
-## 🔨 Getting started
+## Getting started
 
 ### Requirements
 
-- [Terraform] 1.3+
+- [Terraform] 1.14+
 
 ### Installation and usage
 
 ```terraform
-provider "aws" {
-  region = var.region
-}
-
 module "website" {
-  source  = "registry.terraform.io/unfunco/static-website/aws"
+  source  = "unfunco/static-website/aws"
   version = "0.1.0"
 
   domain_name = "unfun.co"
@@ -26,8 +23,11 @@ module "website" {
 ## License
 
 © 2023 [Daniel Morris]\
-Made available under the terms of the [Apache License 2.0].
+Made available under the terms of the [MIT License].
 
-[apache license 2.0]: LICENSE.md
+[aws]: https://aws.amazon.com
+[cloudfront]: https://aws.amazon.com/cloudfront
 [daniel morris]: https://unfun.co
+[mit license]: LICENSE.md
+[s3]: https://aws.amazon.com/s3
 [terraform]: https://terraform.io
