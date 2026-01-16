@@ -49,7 +49,7 @@ module "website" {
 | Name                           | Description                                               | Type          | Default        | Required |
 | ------------------------------ | --------------------------------------------------------- | ------------- | -------------- | :------: |
 | bucket_name                    | Name of the S3 bucket that will store the website.        | `string`      | `""`           |    no    |
-| bucket_name_logs               | Name of the S3 bucket that will store logs.               | `string`      | `null`         |    no    |
+| bucket_name_logs               | Name of the S3 bucket that will store logs.               | `string`      | `""`           |    no    |
 | create                         | Enable/disable the creation of all resources.             | `bool`        | `true`         |    no    |
 | create_certificate             | Enable/disable the creation of an ACM certificate.        | `bool`        | `true`         |    no    |
 | create_cloudfront_distribution | Enable/disable the creation of a CloudFront distribution. | `bool`        | `true`         |    no    |

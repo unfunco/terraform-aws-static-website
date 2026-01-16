@@ -8,7 +8,7 @@ variable "bucket_name" {
 }
 
 variable "bucket_name_logs" {
-  default     = null
+  default     = ""
   description = "Name of the S3 bucket that will store logs."
   type        = string
 }
