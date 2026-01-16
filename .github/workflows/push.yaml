@@ -8,7 +8,7 @@ on:
 jobs:
   verify:
     name: Verify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
@@ -22,3 +22,20 @@ jobs:
       run: terraform fmt -check -recursive
     - name: Validate the configuration
       run: terraform validate
+
+  release:
+    name: Release?
+    needs: [ verify ]
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+    - name: Prepare a release
+      uses: googleapis/release-please-action@v4
+      with:
+        config-file: .github/release-please-config.json
+        manifest-file: .github/release-please-manifest.json
+        token: ${{ secrets.GITHUB_TOKEN }}
