@@ -21,13 +21,13 @@ data "aws_iam_policy_document" "this" {
 
     condition {
       test     = "StringEquals"
-      values   = [random_pet.secret_user_agent[0].id]
-      variable = "aws:UserAgent"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.this[0].arn]
     }
 
     principals {
-      identifiers = ["*"]
-      type        = "*"
+      identifiers = ["cloudfront.amazonaws.com"]
+      type        = "Service"
     }
   }
 }

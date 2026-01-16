@@ -6,13 +6,6 @@ locals {
   domain_name = lower(var.domain_name)
 }
 
-resource "random_pet" "secret_user_agent" {
-  count = var.create ? 1 : 0
-
-  length    = 4
-  separator = "-"
-}
-
 resource "aws_acm_certificate" "this" {
   count  = var.create && var.create_certificate ? 1 : 0
   region = "us-east-1"
@@ -33,11 +26,25 @@ resource "aws_s3_bucket" "this" {
   tags          = var.tags
 }
 
-resource "aws_s3_bucket_acl" "this" {
+resource "aws_s3_bucket_ownership_controls" "this" {
   count = var.create ? 1 : 0
 
-  acl    = "private"
   bucket = aws_s3_bucket.this[0].id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "this" {
+  count = var.create ? 1 : 0
+
+  bucket = aws_s3_bucket.this[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_logging" "this" {
@@ -65,20 +72,6 @@ resource "aws_s3_bucket_versioning" "this" {
   }
 }
 
-resource "aws_s3_bucket_website_configuration" "this" {
-  count = var.create ? 1 : 0
-
-  bucket = aws_s3_bucket.this[0].id
-
-  error_document {
-    key = var.error_document
-  }
-
-  index_document {
-    suffix = var.index_document
-  }
-}
-
 resource "aws_s3_bucket" "logs" {
   count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
 
@@ -87,11 +80,14 @@ resource "aws_s3_bucket" "logs" {
   tags          = var.tags
 }
 
-resource "aws_s3_bucket_acl" "logs" {
+resource "aws_s3_bucket_ownership_controls" "logs" {
   count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
 
-  acl    = "log-delivery-write"
   bucket = aws_s3_bucket.logs[0].id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "logs" {
@@ -129,6 +125,16 @@ resource "aws_s3_bucket_versioning" "logs" {
   }
 }
 
+resource "aws_cloudfront_origin_access_control" "this" {
+  count = var.create && var.create_cloudfront_distribution ? 1 : 0
+
+  name                              = aws_s3_bucket.this[0].id
+  description                       = "OAC for ${local.domain_name}."
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
 resource "aws_cloudfront_distribution" "this" {
   count = var.create && var.create_cloudfront_distribution ? 1 : 0
 
@@ -136,7 +142,7 @@ resource "aws_cloudfront_distribution" "this" {
   comment             = "CloudFront distribution for ${aws_s3_bucket.this[0].id}."
   default_root_object = var.index_document
   enabled             = true
-  http_version        = "http2"
+  http_version        = "http2and3"
   is_ipv6_enabled     = true
   price_class         = "PriceClass_All"
   provider            = aws.us_east_1
@@ -144,23 +150,27 @@ resource "aws_cloudfront_distribution" "this" {
   tags                = var.tags
   wait_for_deployment = true
 
+  custom_error_response {
+    error_caching_min_ttl = 10
+    error_code            = 403
+    response_code         = 404
+    response_page_path    = "/${var.error_document}"
+  }
+
+  custom_error_response {
+    error_caching_min_ttl = 10
+    error_code            = 404
+    response_code         = 404
+    response_page_path    = "/${var.error_document}"
+  }
+
   default_cache_behavior {
     allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed-CachingOptimized
     cached_methods         = ["GET", "HEAD"]
     compress               = true
-    default_ttl            = 300
-    max_ttl                = 3600
-    min_ttl                = 0
     target_origin_id       = aws_s3_bucket.this[0].id
     viewer_protocol_policy = "redirect-to-https"
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
   }
 
   dynamic "logging_config" {
@@ -173,20 +183,9 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   origin {
-    domain_name = aws_s3_bucket_website_configuration.this[0].website_endpoint
-    origin_id   = aws_s3_bucket.this[0].id
-
-    custom_header {
-      name  = "User-Agent"
-      value = random_pet.secret_user_agent[0].id
-    }
-
-    custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols   = ["TLSv1.2"]
-    }
+    domain_name              = aws_s3_bucket.this[0].bucket_regional_domain_name
+    origin_id                = aws_s3_bucket.this[0].id
+    origin_access_control_id = aws_cloudfront_origin_access_control.this[0].id
   }
 
   restrictions {
@@ -198,7 +197,7 @@ resource "aws_cloudfront_distribution" "this" {
   viewer_certificate {
     acm_certificate_arn            = aws_acm_certificate.this[0].arn
     cloudfront_default_certificate = !var.create_certificate
-    minimum_protocol_version       = "TLSv1"
+    minimum_protocol_version       = "TLSv1.2_2021"
     ssl_support_method             = "sni-only"
   }
 }
