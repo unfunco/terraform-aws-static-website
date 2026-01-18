@@ -13,6 +13,12 @@ variable "bucket_name_logs" {
   type        = string
 }
 
+variable "cloudfront_distribution_price_class" {
+  default     = "PriceClass_All"
+  description = "Price class for the CloudFront distribution."
+  type        = string
+}
+
 variable "create" {
   default     = true
   description = "Enable/disable the creation of all resources."
@@ -28,6 +34,12 @@ variable "create_certificate" {
 variable "create_cloudfront_distribution" {
   default     = true
   description = "Enable/disable the creation of a CloudFront distribution."
+  type        = bool
+}
+
+variable "create_default_documents" {
+  default     = true
+  description = "Enable/disable the creation of a default index document."
   type        = bool
 }
 
