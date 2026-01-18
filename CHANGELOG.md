@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.2.0...v0.3.0) (2026-01-18)
+
+
+### 💡 New features
+
+* Add default index and error documents ([#15](https://github.com/unfunco/terraform-aws-static-website/issues/15)) ([0c641b6](https://github.com/unfunco/terraform-aws-static-website/commit/0c641b640a505b445b4aa51e83789973c37dd709))
+
 ## [0.2.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.1.0...v0.2.0) (2026-01-16)
 
 
