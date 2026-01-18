@@ -72,6 +72,58 @@ resource "aws_s3_bucket_versioning" "this" {
   }
 }
 
+resource "aws_s3_object" "error_document" {
+  count = var.create && var.create_default_documents ? 1 : 0
+
+  bucket       = aws_s3_bucket.this[0].id
+  content_type = "text/html"
+  key          = var.error_document
+
+  content = <<-EOF
+    <!DOCTYPE html>
+    <html dir="ltr" lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="initial-scale=1.0,width=device-width">
+      <title>Whoops</title>
+    </head>
+    <body>
+      <p>An error occurred.</p>
+    </body>
+    </html>
+  EOF
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+resource "aws_s3_object" "index_document" {
+  count = var.create && var.create_default_documents ? 1 : 0
+
+  bucket       = aws_s3_bucket.this[0].id
+  content_type = "text/html"
+  key          = var.index_document
+
+  content = <<-EOF
+    <!DOCTYPE html>
+    <html dir="ltr" lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="initial-scale=1.0,width=device-width">
+      <title>Booyah achieved!</title>
+    </head>
+    <body>
+      <p>Your static website has been successfully created!</p>
+    </body>
+    </html>
+  EOF
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
 resource "aws_s3_bucket" "logs" {
   count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
 
@@ -144,7 +196,7 @@ resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   http_version        = "http2and3"
   is_ipv6_enabled     = true
-  price_class         = "PriceClass_All"
+  price_class         = var.cloudfront_distribution_price_class
   provider            = aws.us_east_1
   retain_on_delete    = true
   tags                = var.tags
