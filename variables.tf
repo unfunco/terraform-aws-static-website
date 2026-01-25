@@ -1,21 +1,15 @@
 // SPDX-FileCopyrightText: 2023 Daniel Morris <daniel@honestempire.com>
 // SPDX-License-Identifier: MIT
 
-variable "bucket_name" {
-  default     = ""
-  description = "The name of the S3 bucket for storing website content."
-  type        = string
-}
-
-variable "log_bucket_name" {
-  default     = ""
-  description = "The name of the S3 bucket for storing access logs."
-  type        = string
-}
-
 variable "acm_certificate_arn" {
   default     = ""
   description = "The ARN of an existing ACM certificate to use for the CloudFront distribution. Required when create_certificate is false."
+  type        = string
+}
+
+variable "bucket_name" {
+  default     = ""
+  description = "The name of the S3 bucket for storing website content."
   type        = string
 }
 
@@ -87,6 +81,12 @@ variable "error_document" {
 variable "index_document" {
   default     = "index.html"
   description = "The path to the index document returned for directory requests."
+  type        = string
+}
+
+variable "log_bucket_name" {
+  default     = ""
+  description = "The name of the S3 bucket for storing access logs."
   type        = string
 }
 

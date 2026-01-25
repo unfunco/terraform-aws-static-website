@@ -2,8 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 locals {
-  bucket_name              = var.bucket_name == "" ? local.domain_name : var.bucket_name
-  domain_name              = lower(var.domain_name)
+  bucket_name = var.bucket_name == "" ? local.domain_name : var.bucket_name
+  domain_name = lower(var.domain_name)
+
+  log_bucket_id            = var.create && var.create_log_bucket ? aws_s3_bucket.logs[0].id : var.log_bucket_name
+  log_bucket_domain        = var.create && var.create_log_bucket ? aws_s3_bucket.logs[0].bucket_regional_domain_name : "${var.log_bucket_name}.s3.${data.aws_partition.this[0].dns_suffix}"
   log_bucket_target_prefix = var.log_bucket_target_prefix == "" ? local.bucket_name : var.log_bucket_target_prefix
 }
 
@@ -52,7 +55,7 @@ resource "aws_s3_bucket_logging" "this" {
   count = var.create && var.enable_logging ? 1 : 0
 
   bucket        = aws_s3_bucket.this[0].id
-  target_bucket = var.log_bucket_name == "" ? aws_s3_bucket.logs[0].id : var.log_bucket_name
+  target_bucket = local.log_bucket_id
   target_prefix = "${local.log_bucket_target_prefix}/s3/"
 }
 
@@ -230,7 +233,7 @@ resource "aws_cloudfront_distribution" "this" {
     for_each = var.enable_logging ? [1] : []
 
     content {
-      bucket = aws_s3_bucket.logs[0].bucket_regional_domain_name
+      bucket = local.log_bucket_domain
       prefix = "${local.log_bucket_target_prefix}/cloudfront/"
     }
   }
