@@ -78,6 +78,12 @@ variable "error_document" {
   type        = string
 }
 
+variable "force_destroy" {
+  default     = false
+  description = "Whether to allow bucket deletion even when not empty."
+  type        = bool
+}
+
 variable "index_document" {
   default     = "index.html"
   description = "The path to the index document returned for directory requests."

@@ -63,6 +63,7 @@ module "website" {
 | enable_logging                      | Whether to enable access logging for S3 and CloudFront.                                                                   | `bool`        | `true`             |    no    |
 | enable_versioning                   | Whether to enable versioning on the S3 bucket.                                                                            | `bool`        | `true`             |    no    |
 | error_document                      | The path to the error document returned for 4xx errors.                                                                   | `string`      | `"error.html"`     |    no    |
+| force_destroy                       | Whether to allow bucket deletion even when not empty.                                                                     | `bool`        | `false`            |    no    |
 | index_document                      | The path to the index document returned for directory requests.                                                           | `string`      | `"index.html"`     |    no    |
 | log_bucket_name                     | The name of the S3 bucket for storing access logs.                                                                        | `string`      | `""`               |    no    |
 | log_bucket_target_prefix            | The prefix for log objects in the logging bucket.                                                                         | `string`      | `""`               |    no    |

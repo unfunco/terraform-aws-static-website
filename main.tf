@@ -26,7 +26,7 @@ resource "aws_s3_bucket" "this" {
   count = var.create ? 1 : 0
 
   bucket        = var.bucket_name == "" ? local.domain_name : var.bucket_name
-  force_destroy = true
+  force_destroy = var.force_destroy
   tags          = var.tags
 }
 
@@ -132,7 +132,7 @@ resource "aws_s3_bucket" "logs" {
   count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
 
   bucket        = var.log_bucket_name == "" ? join("-", [aws_s3_bucket.this[0].id, "logs"]) : var.log_bucket_name
-  force_destroy = true
+  force_destroy = var.force_destroy
   tags          = var.tags
 }
 
