@@ -12,6 +12,7 @@ automatic SSL/TLS certificates, HTTP/3, IPv6, and secure defaults using
 
 ### Installation and usage
 
+<!-- x-release-please-start-version -->
 ```terraform
 module "website" {
   source  = "unfunco/static-website/aws"
@@ -20,6 +21,7 @@ module "website" {
   domain_name = "unfun.co"
 }
 ```
+<!-- x-release-please-end -->
 
 <!-- BEGIN_TF_DOCS -->
 

@@ -1,4 +1,4 @@
-name: Push
+name: CI
 
 on:
   push:
@@ -38,4 +38,3 @@ jobs:
       with:
         config-file: .github/release-please-config.json
         manifest-file: .github/release-please-manifest.json
-        token: ${{ secrets.GITHUB_TOKEN }}

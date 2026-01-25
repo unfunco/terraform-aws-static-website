@@ -25,7 +25,6 @@
       "extra-files": [
         {
           "path": "README.md",
-          "regex": "version\\s*=\\s*\"(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\"",
           "type": "generic"
         }
       ],
