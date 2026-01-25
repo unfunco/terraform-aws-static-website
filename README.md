@@ -48,26 +48,30 @@ module "website" {
 
 ### Inputs
 
-| Name                                | Description                                                                                                               | Type          | Default            | Required |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------ | :------: |
-| acm_certificate_arn                 | The ARN of an existing ACM certificate to use for the CloudFront distribution. Required when create_certificate is false. | `string`      | `""`               |    no    |
-| bucket_name                         | The name of the S3 bucket for storing website content.                                                                    | `string`      | `""`               |    no    |
-| cloudfront_distribution_arn         | The ARN of an existing CloudFront distribution to use for the S3 bucket policy.                                           | `string`      | `""`               |    no    |
-| cloudfront_distribution_price_class | The price class for the CloudFront distribution.                                                                          | `string`      | `"PriceClass_All"` |    no    |
-| create                              | Whether to create resources.                                                                                              | `bool`        | `true`             |    no    |
-| create_certificate                  | Whether to create an ACM certificate.                                                                                     | `bool`        | `true`             |    no    |
-| create_cloudfront_distribution      | Whether to create a CloudFront distribution.                                                                              | `bool`        | `true`             |    no    |
-| create_default_documents            | Whether to create default index and error documents.                                                                      | `bool`        | `true`             |    no    |
-| create_log_bucket                   | Whether to create a dedicated logging bucket.                                                                             | `bool`        | `true`             |    no    |
-| domain_name                         | The domain name for the website.                                                                                          | `string`      | n/a                |   yes    |
-| enable_logging                      | Whether to enable access logging for S3 and CloudFront.                                                                   | `bool`        | `true`             |    no    |
-| enable_versioning                   | Whether to enable versioning on the S3 bucket.                                                                            | `bool`        | `true`             |    no    |
-| error_document                      | The path to the error document returned for 4xx errors.                                                                   | `string`      | `"error.html"`     |    no    |
-| force_destroy                       | Whether to allow bucket deletion even when not empty.                                                                     | `bool`        | `false`            |    no    |
-| index_document                      | The path to the index document returned for directory requests.                                                           | `string`      | `"index.html"`     |    no    |
-| log_bucket_name                     | The name of the S3 bucket for storing access logs.                                                                        | `string`      | `""`               |    no    |
-| log_bucket_target_prefix            | The prefix for log objects in the logging bucket.                                                                         | `string`      | `""`               |    no    |
-| tags                                | The tags to apply to all taggable resources.                                                                              | `map(string)` | `{}`               |    no    |
+| Name                                  | Description                                                                                                               | Type           | Default             | Required |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------- | :------: |
+| acm_certificate_arn                   | The ARN of an existing ACM certificate to use for the CloudFront distribution. Required when create_certificate is false. | `string`       | `""`                |    no    |
+| bucket_name                           | The name of the S3 bucket for storing website content.                                                                    | `string`       | `""`                |    no    |
+| cloudfront_allowed_methods            | The HTTP methods allowed by the CloudFront distribution.                                                                  | `list(string)` | `[ "GET", "HEAD" ]` |    no    |
+| cloudfront_distribution_arn           | The ARN of an existing CloudFront distribution to use for the S3 bucket policy.                                           | `string`       | `""`                |    no    |
+| cloudfront_distribution_price_class   | The price class for the CloudFront distribution.                                                                          | `string`       | `"PriceClass_All"`  |    no    |
+| cloudfront_response_headers_policy_id | The ID of a response headers policy to attach to the CloudFront distribution.                                             | `string`       | `null`              |    no    |
+| cloudfront_retain_on_delete           | Whether to retain the CloudFront distribution when deleting the resource.                                                 | `bool`         | `false`             |    no    |
+| cloudfront_web_acl_id                 | The ID of a WAF web ACL to associate with the CloudFront distribution.                                                    | `string`       | `null`              |    no    |
+| create                                | Whether to create resources.                                                                                              | `bool`         | `true`              |    no    |
+| create_certificate                    | Whether to create an ACM certificate.                                                                                     | `bool`         | `true`              |    no    |
+| create_cloudfront_distribution        | Whether to create a CloudFront distribution.                                                                              | `bool`         | `true`              |    no    |
+| create_default_documents              | Whether to create default index and error documents.                                                                      | `bool`         | `true`              |    no    |
+| create_log_bucket                     | Whether to create a dedicated logging bucket.                                                                             | `bool`         | `true`              |    no    |
+| domain_name                           | The domain name for the website.                                                                                          | `string`       | n/a                 |   yes    |
+| enable_logging                        | Whether to enable access logging for S3 and CloudFront.                                                                   | `bool`         | `true`              |    no    |
+| enable_versioning                     | Whether to enable versioning on the S3 bucket.                                                                            | `bool`         | `true`              |    no    |
+| error_document                        | The path to the error document returned for 4xx errors.                                                                   | `string`       | `"error.html"`      |    no    |
+| force_destroy                         | Whether to allow bucket deletion even when not empty.                                                                     | `bool`         | `false`             |    no    |
+| index_document                        | The path to the index document returned for directory requests.                                                           | `string`       | `"index.html"`      |    no    |
+| log_bucket_name                       | The name of the S3 bucket for storing access logs.                                                                        | `string`       | `""`                |    no    |
+| log_bucket_target_prefix              | The prefix for log objects in the logging bucket.                                                                         | `string`       | `""`                |    no    |
+| tags                                  | The tags to apply to all taggable resources.                                                                              | `map(string)`  | `{}`                |    no    |
 
 ### Outputs
 

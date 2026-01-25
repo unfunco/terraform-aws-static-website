@@ -19,9 +19,33 @@ variable "cloudfront_distribution_arn" {
   type        = string
 }
 
+variable "cloudfront_allowed_methods" {
+  default     = ["GET", "HEAD"]
+  description = "The HTTP methods allowed by the CloudFront distribution."
+  type        = list(string)
+}
+
 variable "cloudfront_distribution_price_class" {
   default     = "PriceClass_All"
   description = "The price class for the CloudFront distribution."
+  type        = string
+}
+
+variable "cloudfront_response_headers_policy_id" {
+  default     = null
+  description = "The ID of a response headers policy to attach to the CloudFront distribution."
+  type        = string
+}
+
+variable "cloudfront_retain_on_delete" {
+  default     = false
+  description = "Whether to retain the CloudFront distribution when deleting the resource."
+  type        = bool
+}
+
+variable "cloudfront_web_acl_id" {
+  default     = null
+  description = "The ID of a WAF web ACL to associate with the CloudFront distribution."
   type        = string
 }
 
