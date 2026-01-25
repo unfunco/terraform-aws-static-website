@@ -24,8 +24,8 @@
       "draft": false,
       "extra-files": [
         {
-          "glob": false,
           "path": "README.md",
+          "regex": "version\\s*=\\s*\"(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\"",
           "type": "generic"
         }
       ],
