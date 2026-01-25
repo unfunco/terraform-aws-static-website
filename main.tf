@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 locals {
-  bucket_name = var.bucket_name == "" ? local.domain_name : var.bucket_name
-  domain_name = lower(var.domain_name)
+  bucket_name              = var.bucket_name == "" ? local.domain_name : var.bucket_name
+  domain_name              = lower(var.domain_name)
+  log_bucket_target_prefix = var.log_bucket_target_prefix == "" ? local.bucket_name : var.log_bucket_target_prefix
 }
 
 resource "aws_acm_certificate" "this" {
@@ -52,7 +53,7 @@ resource "aws_s3_bucket_logging" "this" {
 
   bucket        = aws_s3_bucket.this[0].id
   target_bucket = var.bucket_name_logs == "" ? aws_s3_bucket.logs[0].id : var.bucket_name_logs
-  target_prefix = "s3/"
+  target_prefix = "${local.log_bucket_target_prefix}/s3/"
 }
 
 resource "aws_s3_bucket_policy" "this" {
@@ -230,7 +231,7 @@ resource "aws_cloudfront_distribution" "this" {
 
     content {
       bucket = aws_s3_bucket.logs[0].bucket_regional_domain_name
-      prefix = "cloudfront/"
+      prefix = "${local.log_bucket_target_prefix}/cloudfront/"
     }
   }
 

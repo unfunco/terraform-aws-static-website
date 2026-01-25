@@ -64,6 +64,7 @@ module "website" {
 | enable_versioning                   | Enable/disable versioning on the S3 bucket.                                      | `bool`        | `true`             |    no    |
 | error_document                      | Document returned when a 4xx error occurs.                                       | `string`      | `"error.html"`     |    no    |
 | index_document                      | Document returned for directory requests.                                        | `string`      | `"index.html"`     |    no    |
+| log_bucket_target_prefix            | Prefix for log files in the logging bucket.                                      | `string`      | `""`               |    no    |
 | tags                                | Tags to apply to all applicable resources.                                       | `map(string)` | `{}`               |    no    |
 
 ### Outputs
