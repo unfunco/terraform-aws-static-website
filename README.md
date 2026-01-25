@@ -48,22 +48,23 @@ module "website" {
 
 ### Inputs
 
-| Name                                | Description                                               | Type          | Default            | Required |
-| ----------------------------------- | --------------------------------------------------------- | ------------- | ------------------ | :------: |
-| bucket_name                         | Name of the S3 bucket that will store the website.        | `string`      | `""`               |    no    |
-| bucket_name_logs                    | Name of the S3 bucket that will store logs.               | `string`      | `""`               |    no    |
-| cloudfront_distribution_price_class | Price class for the CloudFront distribution.              | `string`      | `"PriceClass_All"` |    no    |
-| create                              | Enable/disable the creation of all resources.             | `bool`        | `true`             |    no    |
-| create_certificate                  | Enable/disable the creation of an ACM certificate.        | `bool`        | `true`             |    no    |
-| create_cloudfront_distribution      | Enable/disable the creation of a CloudFront distribution. | `bool`        | `true`             |    no    |
-| create_default_documents            | Enable/disable the creation of a default index document.  | `bool`        | `true`             |    no    |
-| create_log_bucket                   | Enable/disable the creation of a log bucket.              | `bool`        | `true`             |    no    |
-| domain_name                         | Domain name of the website.                               | `string`      | n/a                |   yes    |
-| enable_logging                      | Enable/disable logging on the S3 bucket.                  | `bool`        | `true`             |    no    |
-| enable_versioning                   | Enable/disable versioning on the S3 bucket.               | `bool`        | `true`             |    no    |
-| error_document                      | Document returned when a 4xx error occurs.                | `string`      | `"error.html"`     |    no    |
-| index_document                      | Document returned for directory requests.                 | `string`      | `"index.html"`     |    no    |
-| tags                                | Tags to apply to all applicable resources.                | `map(string)` | `{}`               |    no    |
+| Name                                | Description                                                                      | Type          | Default            | Required |
+| ----------------------------------- | -------------------------------------------------------------------------------- | ------------- | ------------------ | :------: |
+| bucket_name                         | Name of the S3 bucket that will store the website.                               | `string`      | `""`               |    no    |
+| bucket_name_logs                    | Name of the S3 bucket that will store logs.                                      | `string`      | `""`               |    no    |
+| cloudfront_distribution_arn         | ARN of an existing CloudFront distribution to use instead of creating a new one. | `string`      | `""`               |    no    |
+| cloudfront_distribution_price_class | Price class for the CloudFront distribution.                                     | `string`      | `"PriceClass_All"` |    no    |
+| create                              | Enable/disable the creation of all resources.                                    | `bool`        | `true`             |    no    |
+| create_certificate                  | Enable/disable the creation of an ACM certificate.                               | `bool`        | `true`             |    no    |
+| create_cloudfront_distribution      | Enable/disable the creation of a CloudFront distribution.                        | `bool`        | `true`             |    no    |
+| create_default_documents            | Enable/disable the creation of a default index document.                         | `bool`        | `true`             |    no    |
+| create_log_bucket                   | Enable/disable the creation of a log bucket.                                     | `bool`        | `true`             |    no    |
+| domain_name                         | Domain name of the website.                                                      | `string`      | n/a                |   yes    |
+| enable_logging                      | Enable/disable logging on the S3 bucket.                                         | `bool`        | `true`             |    no    |
+| enable_versioning                   | Enable/disable versioning on the S3 bucket.                                      | `bool`        | `true`             |    no    |
+| error_document                      | Document returned when a 4xx error occurs.                                       | `string`      | `"error.html"`     |    no    |
+| index_document                      | Document returned for directory requests.                                        | `string`      | `"index.html"`     |    no    |
+| tags                                | Tags to apply to all applicable resources.                                       | `map(string)` | `{}`               |    no    |
 
 ### Outputs
 

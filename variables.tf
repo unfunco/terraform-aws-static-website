@@ -13,6 +13,12 @@ variable "bucket_name_logs" {
   type        = string
 }
 
+variable "cloudfront_distribution_arn" {
+  default     = ""
+  description = "ARN of an existing CloudFront distribution to use instead of creating a new one."
+  type        = string
+}
+
 variable "cloudfront_distribution_price_class" {
   default     = "PriceClass_All"
   description = "Price class for the CloudFront distribution."

@@ -6,7 +6,7 @@ data "aws_partition" "this" {
 }
 
 data "aws_iam_policy_document" "this" {
-  count = var.create ? 1 : 0
+  count = var.create && (var.create_cloudfront_distribution || var.cloudfront_distribution_arn != "") ? 1 : 0
 
   statement {
     actions = ["s3:GetObject"]
@@ -22,11 +22,11 @@ data "aws_iam_policy_document" "this" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.this[0].arn]
+      values   = [try(aws_cloudfront_distribution.this[0].arn, var.cloudfront_distribution_arn)]
     }
 
     principals {
-      identifiers = ["cloudfront.amazonaws.com"]
+      identifiers = ["cloudfront.${data.aws_partition.this[0].dns_suffix}"]
       type        = "Service"
     }
   }
