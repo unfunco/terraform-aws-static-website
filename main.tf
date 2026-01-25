@@ -52,7 +52,7 @@ resource "aws_s3_bucket_logging" "this" {
   count = var.create && var.enable_logging ? 1 : 0
 
   bucket        = aws_s3_bucket.this[0].id
-  target_bucket = var.bucket_name_logs == "" ? aws_s3_bucket.logs[0].id : var.bucket_name_logs
+  target_bucket = var.log_bucket_name == "" ? aws_s3_bucket.logs[0].id : var.log_bucket_name
   target_prefix = "${local.log_bucket_target_prefix}/s3/"
 }
 
@@ -128,7 +128,7 @@ resource "aws_s3_object" "index_document" {
 resource "aws_s3_bucket" "logs" {
   count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
 
-  bucket        = var.bucket_name_logs == "" ? join("-", [aws_s3_bucket.this[0].id, "logs"]) : var.bucket_name_logs
+  bucket        = var.log_bucket_name == "" ? join("-", [aws_s3_bucket.this[0].id, "logs"]) : var.log_bucket_name
   force_destroy = true
   tags          = var.tags
 }
@@ -248,7 +248,7 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   viewer_certificate {
-    acm_certificate_arn            = aws_acm_certificate.this[0].arn
+    acm_certificate_arn            = var.create_certificate ? aws_acm_certificate.this[0].arn : var.acm_certificate_arn
     cloudfront_default_certificate = !var.create_certificate
     minimum_protocol_version       = "TLSv1.2_2021"
     ssl_support_method             = "sni-only"
