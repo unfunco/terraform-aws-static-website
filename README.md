@@ -1,5 +1,9 @@
 # terraform-aws-static-website
 
+[![CI](https://github.com/unfunco/terraform-aws-static-website/actions/workflows/ci.yaml/badge.svg)](https://github.com/unfunco/terraform-aws-static-website/actions/workflows/ci.yaml)
+[![Terraform Registry](https://img.shields.io/badge/Terraform%20Registry-unfunco%2Fstatic--website-blue?logo=terraform)](https://registry.terraform.io/modules/unfunco/static-website/aws)
+[![License](https://img.shields.io/github/license/unfunco/terraform-aws-static-website)](LICENSE.md)
+
 Terraform module for [AWS] static website hosting with [S3], [CloudFront] CDN,
 automatic SSL/TLS certificates, HTTP/3, IPv6, and secure defaults using
 [Origin Access Control] (OAC).
