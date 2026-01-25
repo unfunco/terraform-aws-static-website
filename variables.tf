@@ -84,6 +84,12 @@ variable "index_document" {
   type        = string
 }
 
+variable "log_bucket_target_prefix" {
+  default     = ""
+  description = "Prefix for log files in the logging bucket."
+  type        = string
+}
+
 variable "tags" {
   default     = {}
   description = "Tags to apply to all applicable resources."
