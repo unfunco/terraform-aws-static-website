@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.2.0...v0.3.0) (2026-01-25)
+
+
+### 💡 New features
+
+* Add a force_destroy variable for S3 buckets ([#22](https://github.com/unfunco/terraform-aws-static-website/issues/22)) ([c5e48f8](https://github.com/unfunco/terraform-aws-static-website/commit/c5e48f8504b4ae53ba96dc5c23d880b428e18b5a))
+* Add default index and error documents ([#15](https://github.com/unfunco/terraform-aws-static-website/issues/15)) ([0c641b6](https://github.com/unfunco/terraform-aws-static-website/commit/0c641b640a505b445b4aa51e83789973c37dd709))
+* Allow custom log bucket target prefixes ([#19](https://github.com/unfunco/terraform-aws-static-website/issues/19)) ([dbec703](https://github.com/unfunco/terraform-aws-static-website/commit/dbec703df6aa2e7ce256360ab6d5b0d0e6fe86bf))
+* Allow the ACM certificate ARN to be set ([#20](https://github.com/unfunco/terraform-aws-static-website/issues/20)) ([d6416d0](https://github.com/unfunco/terraform-aws-static-website/commit/d6416d0f93c1a0560dbc89c0cfc7e25ed2892dc1))
+* Make more of CloudFront configurable ([#23](https://github.com/unfunco/terraform-aws-static-website/issues/23)) ([b492527](https://github.com/unfunco/terraform-aws-static-website/commit/b49252795eeddc8cbab580cc8f42c1485f7938b3))
+
+
+### 🐛 Bug fixes
+
+* Allow custom CloudFront distribution ARNs ([#18](https://github.com/unfunco/terraform-aws-static-website/issues/18)) ([8373f78](https://github.com/unfunco/terraform-aws-static-website/commit/8373f7815afbeb8a252195dd6a3f451b35affffd))
+* Update references to non-existent S3 bucket ([#21](https://github.com/unfunco/terraform-aws-static-website/issues/21)) ([c971b3f](https://github.com/unfunco/terraform-aws-static-website/commit/c971b3f4a63d130a4d9c99310eb3016edd04a694))
+* Update version numbers in the README ([#25](https://github.com/unfunco/terraform-aws-static-website/issues/25)) ([39b428e](https://github.com/unfunco/terraform-aws-static-website/commit/39b428eb872f05ba816ed4d867aa47537ab6b6b9))
+
+
+### 🧹 Miscellaneous
+
+* Add README badges ([#26](https://github.com/unfunco/terraform-aws-static-website/issues/26)) ([3a4bf49](https://github.com/unfunco/terraform-aws-static-website/commit/3a4bf49c4309f12d4711cd194b3a4c190d9ebed5))
+* Configure regex to update version in README ([#24](https://github.com/unfunco/terraform-aws-static-website/issues/24)) ([851b58d](https://github.com/unfunco/terraform-aws-static-website/commit/851b58dc0a7e5c78e89daf49e6476cf1edfb0606))
+
 ## [0.2.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.1.0...v0.2.0) (2026-01-16)
 
 
