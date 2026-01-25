@@ -202,9 +202,10 @@ resource "aws_cloudfront_distribution" "this" {
   is_ipv6_enabled     = true
   price_class         = var.cloudfront_distribution_price_class
   provider            = aws.us_east_1
-  retain_on_delete    = true
+  retain_on_delete    = var.cloudfront_retain_on_delete
   tags                = var.tags
   wait_for_deployment = true
+  web_acl_id          = var.cloudfront_web_acl_id
 
   custom_error_response {
     error_caching_min_ttl = 10
@@ -221,12 +222,13 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   default_cache_behavior {
-    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed-CachingOptimized
-    cached_methods         = ["GET", "HEAD"]
-    compress               = true
-    target_origin_id       = aws_s3_bucket.this[0].id
-    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods            = var.cloudfront_allowed_methods
+    cache_policy_id            = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed-CachingOptimized
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    response_headers_policy_id = var.cloudfront_response_headers_policy_id
+    target_origin_id           = aws_s3_bucket.this[0].id
+    viewer_protocol_policy     = "redirect-to-https"
   }
 
   dynamic "logging_config" {
