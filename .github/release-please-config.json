@@ -26,6 +26,10 @@
         {
           "path": "README.md",
           "type": "generic"
+        },
+        {
+          "path": "modules/ci-iam-policy/README.md",
+          "type": "generic"
         }
       ],
       "extra-label": "automata 🤖,autorelease: pending,chore 🧹",

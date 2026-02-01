@@ -17,6 +17,7 @@ automatic SSL/TLS certificates, HTTP/3, IPv6, and secure defaults using
 ### Installation and usage
 
 <!-- x-release-please-start-version -->
+
 ```terraform
 module "website" {
   source  = "unfunco/static-website/aws"
@@ -25,7 +26,34 @@ module "website" {
   domain_name = "unfun.co"
 }
 ```
+
+#### IAM
+
+```terraform
+module "ci_iam_policy_deploy" {
+  source  = "unfunco/static-website/aws//modules/ci-iam-policy"
+  version = "0.3.0"
+
+  attach_content_permissions  = true
+  bucket_name                 = module.website.bucket_name
+  cloudfront_distribution_arn = module.website.cloudfront_distribution_arn
+}
+```
+
 <!-- x-release-please-end -->
+
+```terraform
+module "oidc_github" {
+  source  = "unfunco/oidc-github/aws"
+  version = "2.0.2"
+
+  github_repositories = ["unfunco/unfun.co"]
+
+  iam_role_inline_policies = {
+    deploy = module.ci_iam_policy_deploy.policy_document
+  }
+}
+```
 
 <!-- BEGIN_TF_DOCS -->
 
@@ -85,8 +113,10 @@ module "website" {
 | ------------------------------------- | ----------------------------------------------------- |
 | bucket_arn                            | The ARN of the S3 bucket.                             |
 | bucket_id                             | The ID of the S3 bucket.                              |
+| bucket_name                           | The name of the S3 bucket.                            |
 | certificate_arn                       | The ARN of the ACM certificate.                       |
 | certificate_domain_validation_options | The domain validation options of the ACM certificate. |
+| cloudfront_distribution_arn           | The ARN of the CloudFront distribution.               |
 | cloudfront_distribution_id            | The CloudFront distribution ID.                       |
 | cloudfront_domain_name                | The CloudFront domain name.                           |
 | cloudfront_hosted_zone_id             | The hosted zone ID of the CloudFront distribution.    |
