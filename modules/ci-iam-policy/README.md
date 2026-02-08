@@ -7,7 +7,7 @@
 ```terraform
 module "ci_iam_policy" {
   source  = "unfunco/static-website/aws//modules/ci-iam-policy"
-  version = "0.3.0"
+  version = "0.4.0"
 
   attach_content_permissions  = true
   bucket_name                 = "unfun.co"
