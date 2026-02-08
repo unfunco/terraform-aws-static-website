@@ -11,6 +11,11 @@ output "bucket_id" {
   value       = try(aws_s3_bucket.this[0].id, "")
 }
 
+output "bucket_name" {
+  description = "The name of the S3 bucket."
+  value       = try(aws_s3_bucket.this[0].id, "")
+}
+
 output "certificate_arn" {
   description = "The ARN of the ACM certificate."
   value       = try(aws_acm_certificate.this[0].arn, "")
@@ -24,6 +29,11 @@ output "certificate_domain_validation_options" {
 output "cloudfront_distribution_id" {
   description = "The CloudFront distribution ID."
   value       = try(aws_cloudfront_distribution.this[0].id, "")
+}
+
+output "cloudfront_distribution_arn" {
+  description = "The ARN of the CloudFront distribution."
+  value       = try(aws_cloudfront_distribution.this[0].arn, "")
 }
 
 output "cloudfront_domain_name" {
