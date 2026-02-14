@@ -29,14 +29,22 @@ module "website" {
 
 #### IAM
 
+Use the bundled `modules/ci-iam-policy` module to generate an inline IAM policy
+document for your CI role. The module has two boolean inputs to control which
+permissions are included, `attach_content_permissions` is enough for deploy jobs
+that sync website content and invalidate CloudFront, while
+`attach_infrastructure_permissions` is for Terraform jobs that create or update
+AWS resources.
+
 ```terraform
 module "ci_iam_policy_deploy" {
   source  = "unfunco/static-website/aws//modules/ci-iam-policy"
   version = "0.4.0"
 
-  attach_content_permissions  = true
-  bucket_name                 = module.website.bucket_name
-  cloudfront_distribution_arn = module.website.cloudfront_distribution_arn
+  attach_content_permissions        = true
+  attach_infrastructure_permissions = false
+  bucket_name                       = module.website.bucket_name
+  cloudfront_distribution_arn       = module.website.cloudfront_distribution_arn
 }
 ```
 
