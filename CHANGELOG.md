@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.3.0...v0.4.0) (2026-02-08)
+
+
+### 💡 New features
+
+* Add an IAM policy for CI pipelines ([#27](https://github.com/unfunco/terraform-aws-static-website/issues/27)) ([f24c092](https://github.com/unfunco/terraform-aws-static-website/commit/f24c09263da1c889d2f662db64e2d8c16d2bfaf6))
+
 ## [0.3.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.2.0...v0.3.0) (2026-01-25)
 
 

@@ -21,7 +21,7 @@ automatic SSL/TLS certificates, HTTP/3, IPv6, and secure defaults using
 ```terraform
 module "website" {
   source  = "unfunco/static-website/aws"
-  version = "0.3.0"
+  version = "0.4.0"
 
   domain_name = "unfun.co"
 }
@@ -32,7 +32,7 @@ module "website" {
 ```terraform
 module "ci_iam_policy_deploy" {
   source  = "unfunco/static-website/aws//modules/ci-iam-policy"
-  version = "0.3.0"
+  version = "0.4.0"
 
   attach_content_permissions  = true
   bucket_name                 = module.website.bucket_name
