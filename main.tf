@@ -231,6 +231,22 @@ resource "aws_cloudfront_distribution" "this" {
     viewer_protocol_policy     = "redirect-to-https"
   }
 
+  dynamic "ordered_cache_behavior" {
+    for_each = var.cloudfront_ordered_cache_behaviors
+
+    content {
+      allowed_methods            = ordered_cache_behavior.value.allowed_methods
+      cache_policy_id            = ordered_cache_behavior.value.cache_policy_id
+      cached_methods             = ordered_cache_behavior.value.cached_methods
+      compress                   = ordered_cache_behavior.value.compress
+      origin_request_policy_id   = try(ordered_cache_behavior.value.origin_request_policy_id, null)
+      path_pattern               = ordered_cache_behavior.value.path_pattern
+      response_headers_policy_id = try(ordered_cache_behavior.value.response_headers_policy_id, var.cloudfront_response_headers_policy_id)
+      target_origin_id           = ordered_cache_behavior.value.target_origin_id
+      viewer_protocol_policy     = ordered_cache_behavior.value.viewer_protocol_policy
+    }
+  }
+
   dynamic "logging_config" {
     for_each = var.enable_logging ? [1] : []
 
@@ -244,6 +260,31 @@ resource "aws_cloudfront_distribution" "this" {
     domain_name              = aws_s3_bucket.this[0].bucket_regional_domain_name
     origin_id                = aws_s3_bucket.this[0].id
     origin_access_control_id = aws_cloudfront_origin_access_control.this[0].id
+  }
+
+  dynamic "origin" {
+    for_each = var.cloudfront_additional_origins
+
+    content {
+      connection_attempts = origin.value.connection_attempts
+      connection_timeout  = origin.value.connection_timeout
+      domain_name         = origin.value.domain_name
+      origin_id           = origin.key
+      origin_path         = try(origin.value.origin_path, null)
+      origin_access_control_id = origin.value.use_default_origin_access_control ? aws_cloudfront_origin_access_control.this[0].id : try(
+        origin.value.origin_access_control_id,
+        null,
+      )
+
+      dynamic "custom_header" {
+        for_each = origin.value.custom_headers
+
+        content {
+          name  = custom_header.key
+          value = custom_header.value
+        }
+      }
+    }
   }
 
   restrictions {
