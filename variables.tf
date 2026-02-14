@@ -25,10 +25,40 @@ variable "cloudfront_allowed_methods" {
   type        = list(string)
 }
 
+variable "cloudfront_additional_origins" {
+  default     = {}
+  description = "Additional origins to add to the CloudFront distribution, keyed by origin ID."
+  type = map(object({
+    connection_attempts               = optional(number, 3)
+    connection_timeout                = optional(number, 10)
+    custom_headers                    = optional(map(string), {})
+    domain_name                       = string
+    origin_access_control_id          = optional(string)
+    origin_path                       = optional(string)
+    use_default_origin_access_control = optional(bool, false)
+  }))
+}
+
 variable "cloudfront_distribution_price_class" {
   default     = "PriceClass_All"
   description = "The price class for the CloudFront distribution."
   type        = string
+}
+
+variable "cloudfront_ordered_cache_behaviors" {
+  default     = []
+  description = "Additional ordered cache behaviors for path-based routing."
+  type = list(object({
+    allowed_methods            = optional(list(string), ["GET", "HEAD"])
+    cache_policy_id            = optional(string, "658327ea-f89d-4fab-a63d-7e88639e58f6")
+    cached_methods             = optional(list(string), ["GET", "HEAD"])
+    compress                   = optional(bool, true)
+    origin_request_policy_id   = optional(string)
+    path_pattern               = string
+    response_headers_policy_id = optional(string)
+    target_origin_id           = string
+    viewer_protocol_policy     = optional(string, "redirect-to-https")
+  }))
 }
 
 variable "cloudfront_response_headers_policy_id" {
