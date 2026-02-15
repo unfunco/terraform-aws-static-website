@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.5.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.4.0...v0.5.0) (2026-02-15)
+
+
+### 💡 New features
+
+* Add support for custom origins and behaviour ([#29](https://github.com/unfunco/terraform-aws-static-website/issues/29)) ([d9bf8cd](https://github.com/unfunco/terraform-aws-static-website/commit/d9bf8cd85d7544626f214589f3536a8abfa24c08))
+* Lock objects in the logs bucket by default ([#35](https://github.com/unfunco/terraform-aws-static-website/issues/35)) ([bb86a1e](https://github.com/unfunco/terraform-aws-static-website/commit/bb86a1e58dc692414b61b65e6ec13a34c9416502))
+
+
+### 🐛 Bug fixes
+
+* Never use the default CloudFront certificate ([#33](https://github.com/unfunco/terraform-aws-static-website/issues/33)) ([6d31edf](https://github.com/unfunco/terraform-aws-static-website/commit/6d31edfffe201d25ba1a149ce27a55bcf1939c5e))
+* Update CI policy to include the log bucket ([#34](https://github.com/unfunco/terraform-aws-static-website/issues/34)) ([56b7758](https://github.com/unfunco/terraform-aws-static-website/commit/56b7758c75f3268c7e074c8ab00c54bffb5f0fb4))
+
+
+### 🧹 Miscellaneous
+
+* Document the CI policy module ([#31](https://github.com/unfunco/terraform-aws-static-website/issues/31)) ([340e5b3](https://github.com/unfunco/terraform-aws-static-website/commit/340e5b34d705c46478b26c7e634eae9a4d3e038b))
+
 ## [0.4.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.3.0...v0.4.0) (2026-02-08)
 
 
