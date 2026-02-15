@@ -155,6 +155,34 @@ variable "log_bucket_name" {
   type        = string
 }
 
+variable "log_bucket_object_lock_days" {
+  default     = 365
+  description = "Default retention period, in days, for object lock on the logging bucket."
+  type        = number
+
+  validation {
+    condition     = !var.log_bucket_object_lock_enabled || var.log_bucket_object_lock_days >= 1
+    error_message = "Set log_bucket_object_lock_days to at least 1 when log_bucket_object_lock_enabled is true."
+  }
+}
+
+variable "log_bucket_object_lock_enabled" {
+  default     = true
+  description = "Whether to enable S3 Object Lock on the logging bucket. This only applies at bucket creation time."
+  type        = bool
+}
+
+variable "log_bucket_object_lock_mode" {
+  default     = "GOVERNANCE"
+  description = "Default object lock retention mode for the logging bucket. Valid values are GOVERNANCE or COMPLIANCE."
+  type        = string
+
+  validation {
+    condition     = contains(["GOVERNANCE", "COMPLIANCE"], var.log_bucket_object_lock_mode)
+    error_message = "Set log_bucket_object_lock_mode to GOVERNANCE or COMPLIANCE."
+  }
+}
+
 variable "log_bucket_target_prefix" {
   default     = ""
   description = "The prefix for log objects in the logging bucket."
