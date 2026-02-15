@@ -5,6 +5,11 @@ variable "acm_certificate_arn" {
   default     = ""
   description = "The ARN of an existing ACM certificate to use for the CloudFront distribution. Required when create_certificate is false."
   type        = string
+
+  validation {
+    condition     = !var.create || !var.create_cloudfront_distribution || var.create_certificate || trim(var.acm_certificate_arn) != ""
+    error_message = "Set acm_certificate_arn when create_certificate is false and create_cloudfront_distribution is true."
+  }
 }
 
 variable "bucket_name" {
