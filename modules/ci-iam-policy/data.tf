@@ -5,6 +5,13 @@ data "aws_partition" "this" {
   count = var.create ? 1 : 0
 }
 
+locals {
+  infrastructure_bucket_names = distinct(compact([
+    var.bucket_name,
+    var.log_bucket_name != "" ? var.log_bucket_name : "${var.bucket_name}-logs",
+  ]))
+}
+
 data "aws_iam_policy_document" "content" {
   count = var.create && var.attach_content_permissions ? 1 : 0
 
@@ -152,13 +159,11 @@ data "aws_iam_policy_document" "infrastructure" {
     ]
 
     effect = "Allow"
-    resources = [
-      format(
-        "arn:%s:s3:::%s",
-        data.aws_partition.this[0].partition,
-        var.bucket_name,
-      ),
-    ]
+    resources = [for bucket_name in local.infrastructure_bucket_names : format(
+      "arn:%s:s3:::%s",
+      data.aws_partition.this[0].partition,
+      bucket_name,
+    )]
 
     sid = "StaticWebsiteInfrastructurePermissionsS3"
   }
@@ -174,13 +179,11 @@ data "aws_iam_policy_document" "infrastructure" {
     ]
 
     effect = "Allow"
-    resources = [
-      format(
-        "arn:%s:s3:::%s/*",
-        data.aws_partition.this[0].partition,
-        var.bucket_name,
-      ),
-    ]
+    resources = [for bucket_name in local.infrastructure_bucket_names : format(
+      "arn:%s:s3:::%s/*",
+      data.aws_partition.this[0].partition,
+      bucket_name,
+    )]
 
     sid = "StaticWebsiteInfrastructurePermissionsS3Object"
   }

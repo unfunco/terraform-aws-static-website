@@ -36,6 +36,7 @@ module "ci_iam_policy" {
 | bucket_name                       | The name of the S3 bucket for the static website.                                                                   | `string`      | n/a     |   yes    |
 | cloudfront_distribution_arn       | The ARN of the CloudFront distribution for scoping cache invalidation permissions.                                  | `string`      | `"*"`   |    no    |
 | create                            | Whether to create resources.                                                                                        | `bool`        | `true`  |    no    |
+| log_bucket_name                   | The name of the S3 bucket used for access logs. Leave empty to use `"<bucket_name>-logs"`.                        | `string`      | `""`    |    no    |
 | required_resource_tags            | Required aws:ResourceTag conditions for content permissions. Keys are tag names and values are required tag values. | `map(string)` | `{}`    |    no    |
 
 ### Outputs

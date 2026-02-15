@@ -18,6 +18,12 @@ variable "bucket_name" {
   type        = string
 }
 
+variable "log_bucket_name" {
+  default     = ""
+  description = "The name of the S3 bucket used for access logs. Leave empty to use \"<bucket_name>-logs\"."
+  type        = string
+}
+
 variable "cloudfront_distribution_arn" {
   default     = "*"
   description = "The ARN of the CloudFront distribution for scoping cache invalidation permissions."
