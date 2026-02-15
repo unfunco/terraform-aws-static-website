@@ -131,9 +131,10 @@ resource "aws_s3_object" "index_document" {
 resource "aws_s3_bucket" "logs" {
   count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
 
-  bucket        = var.log_bucket_name == "" ? join("-", [aws_s3_bucket.this[0].id, "logs"]) : var.log_bucket_name
-  force_destroy = var.force_destroy
-  tags          = var.tags
+  bucket              = var.log_bucket_name == "" ? join("-", [aws_s3_bucket.this[0].id, "logs"]) : var.log_bucket_name
+  force_destroy       = var.force_destroy
+  object_lock_enabled = var.log_bucket_object_lock_enabled
+  tags                = var.tags
 }
 
 resource "aws_s3_bucket_ownership_controls" "logs" {
@@ -177,7 +178,22 @@ resource "aws_s3_bucket_versioning" "logs" {
   bucket = aws_s3_bucket.logs[0].id
 
   versioning_configuration {
-    status = "Suspended"
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_object_lock_configuration" "logs" {
+  count      = var.create && var.enable_logging && var.create_log_bucket && var.log_bucket_object_lock_enabled ? 1 : 0
+  depends_on = [aws_s3_bucket_versioning.logs]
+
+  bucket              = aws_s3_bucket.logs[0].id
+  object_lock_enabled = "Enabled"
+
+  rule {
+    default_retention {
+      days = var.log_bucket_object_lock_days
+      mode = var.log_bucket_object_lock_mode
+    }
   }
 }
 
