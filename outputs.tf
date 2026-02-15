@@ -26,14 +26,14 @@ output "certificate_domain_validation_options" {
   value       = try(aws_acm_certificate.this[0].domain_validation_options, [])
 }
 
-output "cloudfront_distribution_id" {
-  description = "The CloudFront distribution ID."
-  value       = try(aws_cloudfront_distribution.this[0].id, "")
-}
-
 output "cloudfront_distribution_arn" {
   description = "The ARN of the CloudFront distribution."
   value       = try(aws_cloudfront_distribution.this[0].arn, "")
+}
+
+output "cloudfront_distribution_id" {
+  description = "The CloudFront distribution ID."
+  value       = try(aws_cloudfront_distribution.this[0].id, "")
 }
 
 output "cloudfront_domain_name" {
