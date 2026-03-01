@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/unfunco/terraform-aws-static-website/compare/v0.5.0...v0.5.1) (2026-03-01)
+
+
+### 🧹 Miscellaneous
+
+* Bump hashicorp/setup-terraform from 3 to 4 ([#36](https://github.com/unfunco/terraform-aws-static-website/issues/36)) ([808b364](https://github.com/unfunco/terraform-aws-static-website/commit/808b364720004cfec98687e32986c6626fcd97f8))
+
 ## [0.5.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.4.0...v0.5.0) (2026-02-15)
 
 
