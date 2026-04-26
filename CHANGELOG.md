@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.1](https://github.com/unfunco/terraform-aws-static-website/compare/v0.5.0...v0.5.1) (2026-04-26)
+
+
+### 🧹 Miscellaneous
+
+* Bump googleapis/release-please-action from 4.4.0 to 4.4.1 ([#39](https://github.com/unfunco/terraform-aws-static-website/issues/39)) ([367b1b6](https://github.com/unfunco/terraform-aws-static-website/commit/367b1b6acda0b995fc0ec4f38c9b3ef35bb6f36a))
+* Bump googleapis/release-please-action from 4.4.1 to 5.0.0 ([#40](https://github.com/unfunco/terraform-aws-static-website/issues/40)) ([7f254f1](https://github.com/unfunco/terraform-aws-static-website/commit/7f254f1f6826c69ec9cdd55f2f7aa5db71fe6bbe))
+* Bump hashicorp/setup-terraform from 3 to 4 ([#36](https://github.com/unfunco/terraform-aws-static-website/issues/36)) ([808b364](https://github.com/unfunco/terraform-aws-static-website/commit/808b364720004cfec98687e32986c6626fcd97f8))
+* Pin GitHub Actions ([#38](https://github.com/unfunco/terraform-aws-static-website/issues/38)) ([6cd6b77](https://github.com/unfunco/terraform-aws-static-website/commit/6cd6b77d3770fb4523c289d4941ee7151db9dc9b))
+
 ## [0.5.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.4.0...v0.5.0) (2026-02-15)
 
 
