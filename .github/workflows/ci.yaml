@@ -8,29 +8,16 @@ on:
 jobs:
   verify:
     name: Verify (${{ matrix.directory }})
-    runs-on: ubuntu-24.04
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
-      with:
-        terraform_version: 1.14.0
-    - name: Initialise with no backend
-      run: terraform init -backend=false
-    - name: Check formatting
-      run: terraform fmt -check -recursive
-    - name: Validate the configuration
-      run: terraform validate
+    uses: unfunco/meta/.github/workflows/verify-terraform.yaml@dc15f9a32fe01b1b7cc44e095ab9e9bdd98bb0b7
+    with:
+      terraform-version-file: .terraform-version
+      working-directory: ${{ matrix.directory }}
     strategy:
       fail-fast: false
       matrix:
         directory:
         - .
         - modules/ci-iam-policy
-    defaults:
-      run:
-        working-directory: ${{ matrix.directory }}
 
   release:
     name: Release?
