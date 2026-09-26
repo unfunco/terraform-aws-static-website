@@ -8,7 +8,7 @@ on:
 jobs:
   verify:
     name: Verify (${{ matrix.directory }})
-    uses: unfunco/meta/.github/workflows/verify-terraform.yaml@dc15f9a32fe01b1b7cc44e095ab9e9bdd98bb0b7
+    uses: unfunco/meta/.github/workflows/verify-terraform.yaml@2cf07936a31dca1b82fe1e447f48e1580c10880e # v0.2.0
     with:
       terraform-version-file: .terraform-version
       working-directory: ${{ matrix.directory }}
@@ -25,12 +25,4 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    runs-on: ubuntu-24.04
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - name: Prepare a release
-      uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
-      with:
-        config-file: .github/release-please-config.json
-        manifest-file: .github/release-please-manifest.json
+    uses: unfunco/meta/.github/workflows/release-please.yaml@2cf07936a31dca1b82fe1e447f48e1580c10880e # v0.2.0
