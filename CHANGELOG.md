@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.1](https://github.com/unfunco/terraform-aws-static-website/compare/v0.5.0...v0.5.1) (2026-09-26)
+
+
+### 🧹 Miscellaneous
+
+* Bump actions/checkout from 6.0.2 to 6.0.3 ([#42](https://github.com/unfunco/terraform-aws-static-website/issues/42)) ([2da22ca](https://github.com/unfunco/terraform-aws-static-website/commit/2da22ca143bacc4833ddb11913624325650898d2))
+* Bump actions/checkout from 6.0.3 to 7.0.0 ([#43](https://github.com/unfunco/terraform-aws-static-website/issues/43)) ([45eda55](https://github.com/unfunco/terraform-aws-static-website/commit/45eda55ee3ab27b780e80e0886913bfe7e5f3d6c))
+* Bump actions/checkout from 7.0.0 to 7.0.1 ([#44](https://github.com/unfunco/terraform-aws-static-website/issues/44)) ([1276446](https://github.com/unfunco/terraform-aws-static-website/commit/1276446602587b77416efe731c960c9c72500cd5))
+* Bump googleapis/release-please-action from 4.4.0 to 4.4.1 ([#39](https://github.com/unfunco/terraform-aws-static-website/issues/39)) ([367b1b6](https://github.com/unfunco/terraform-aws-static-website/commit/367b1b6acda0b995fc0ec4f38c9b3ef35bb6f36a))
+* Bump googleapis/release-please-action from 4.4.1 to 5.0.0 ([#40](https://github.com/unfunco/terraform-aws-static-website/issues/40)) ([7f254f1](https://github.com/unfunco/terraform-aws-static-website/commit/7f254f1f6826c69ec9cdd55f2f7aa5db71fe6bbe))
+* Bump hashicorp/setup-terraform from 3 to 4 ([#36](https://github.com/unfunco/terraform-aws-static-website/issues/36)) ([808b364](https://github.com/unfunco/terraform-aws-static-website/commit/808b364720004cfec98687e32986c6626fcd97f8))
+* Bump hashicorp/setup-terraform from 4.0.0 to 4.0.1 ([#41](https://github.com/unfunco/terraform-aws-static-website/issues/41)) ([902dcf4](https://github.com/unfunco/terraform-aws-static-website/commit/902dcf40f3b9a531da64fba2433ada06c68491e8))
+* Pin GitHub Actions ([#38](https://github.com/unfunco/terraform-aws-static-website/issues/38)) ([6cd6b77](https://github.com/unfunco/terraform-aws-static-website/commit/6cd6b77d3770fb4523c289d4941ee7151db9dc9b))
+* Update unfunco/meta workflows to v0.2.0 ([#46](https://github.com/unfunco/terraform-aws-static-website/issues/46)) ([3a59418](https://github.com/unfunco/terraform-aws-static-website/commit/3a59418a3585a62f5bc83dab27c9fe40a87b358d))
+* Use shared Terraform verification workflow ([#45](https://github.com/unfunco/terraform-aws-static-website/issues/45)) ([bd041c8](https://github.com/unfunco/terraform-aws-static-website/commit/bd041c81b13dfed56c87ae0d3a648b8c99e684fe))
+
 ## [0.5.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.4.0...v0.5.0) (2026-02-15)
 
 
