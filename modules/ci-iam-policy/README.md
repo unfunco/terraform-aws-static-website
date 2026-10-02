@@ -1,5 +1,9 @@
 # IAM policy for CI/CD pipelines
 
+### Requirements
+
+- [Terraform] 1.14+ and the [AWS provider] 6.67.0+
+
 ### Installation and usage
 
 <!-- x-release-please-start-version -->
@@ -20,30 +24,30 @@ module "ci_iam_policy" {
 
 ### Resources
 
-| Name                                                                                                                                         | Type        |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| [aws_iam_policy_document.combined](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document)       | data source |
-| [aws_iam_policy_document.content](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document)        | data source |
+| Name | Type |
+| ---- | ---- |
+| [aws_iam_policy_document.combined](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.content](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.infrastructure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_partition.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition)                               | data source |
+| [aws_partition.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 
 ### Inputs
 
-| Name                              | Description                                                                                                         | Type          | Default | Required |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------- | ------- | :------: |
-| attach_content_permissions        | Whether to attach permissions for deploying content to the S3 bucket.                                               | `bool`        | `true`  |    no    |
-| attach_infrastructure_permissions | Whether to attach permissions for managing the underlying infrastructure.                                           | `bool`        | `false` |    no    |
-| bucket_name                       | The name of the S3 bucket for the static website.                                                                   | `string`      | n/a     |   yes    |
-| cloudfront_distribution_arn       | The ARN of the CloudFront distribution for scoping cache invalidation permissions.                                  | `string`      | `"*"`   |    no    |
-| create                            | Whether to create resources.                                                                                        | `bool`        | `true`  |    no    |
-| log_bucket_name                   | The name of the S3 bucket used for access logs. Leave empty to use `"<bucket_name>-logs"`.                        | `string`      | `""`    |    no    |
-| required_resource_tags            | Required aws:ResourceTag conditions for content permissions. Keys are tag names and values are required tag values. | `map(string)` | `{}`    |    no    |
+| Name | Description | Type | Default | Required |
+| ---- | ----------- | ---- | ------- | :------: |
+| attach\_content\_permissions | Whether to attach permissions for deploying content to the S3 bucket. | `bool` | `true` | no |
+| attach\_infrastructure\_permissions | Whether to attach permissions for managing the underlying infrastructure. | `bool` | `false` | no |
+| bucket\_name | The name of the S3 bucket for the static website. | `string` | n/a | yes |
+| cloudfront\_distribution\_arn | The ARN of the CloudFront distribution for scoping cache invalidation permissions. | `string` | `"*"` | no |
+| create | Whether to create resources. | `bool` | `true` | no |
+| log\_bucket\_name | The name of the S3 bucket used for access logs. Leave empty to use "<bucket\_name>-logs". | `string` | `""` | no |
+| required\_resource\_tags | Required aws:ResourceTag conditions for content permissions. Keys are tag names and values are required tag values. | `map(string)` | `{}` | no |
 
 ### Outputs
 
-| Name            | Description                                                                                                        |
-| --------------- | ------------------------------------------------------------------------------------------------------------------ |
-| policy_document | The JSON-encoded IAM policy document. Can be passed to iam_role_inline_policies in the unfunco/oidc-github module. |
+| Name | Description |
+| ---- | ----------- |
+| policy\_document | The JSON-encoded IAM policy document. Can be passed to iam\_role\_inline\_policies in the unfunco/oidc-github module. |
 
 <!-- END_TF_DOCS -->
 
