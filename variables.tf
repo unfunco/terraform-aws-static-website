@@ -216,6 +216,17 @@ variable "pretty_urls" {
   }
 }
 
+variable "route53_zone_id" {
+  default     = null
+  description = "The ID of the Route 53 hosted zone for domain_name. When set, the module validates the certificate with a DNS record in the zone and waits for it to be issued before creating the distribution, and creates A and AAAA alias records for the distribution."
+  type        = string
+
+  validation {
+    condition     = var.route53_zone_id == null ? true : trimspace(var.route53_zone_id) != ""
+    error_message = "Set route53_zone_id to a hosted zone ID, or to null."
+  }
+}
+
 variable "tags" {
   default     = {}
   description = "The tags to apply to all taggable resources."

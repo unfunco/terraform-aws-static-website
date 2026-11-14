@@ -9,6 +9,9 @@ locals {
   create_log_bucket              = var.create && var.enable_logging && var.create_log_bucket
   create_pretty_urls_function    = local.create_cloudfront_distribution && var.pretty_urls != null
 
+  create_dns_records   = local.create_cloudfront_distribution && var.route53_zone_id != null
+  validate_certificate = var.create && var.create_certificate && var.route53_zone_id != null
+
   // CloudFront's legacy standard logging writes with the awslogsdelivery
   // account, which needs a grant in the log bucket's ACL.
   create_log_bucket_acl = local.create_log_bucket && local.create_cloudfront_distribution
@@ -31,6 +34,16 @@ locals {
     try(data.aws_partition.this[0].dns_suffix, "amazonaws.com"),
   )
   log_bucket_target_prefix = var.log_bucket_target_prefix == "" ? local.bucket_name : var.log_bucket_target_prefix
+
+  certificate_validation_options = local.validate_certificate ? {
+    for option in aws_acm_certificate.this[0].domain_validation_options : option.domain_name => option
+  } : {}
+
+  // The distribution waits for the certificate to be issued when the module
+  // validates it, because CloudFront rejects a certificate pending validation.
+  certificate_arn = !var.create_certificate ? var.acm_certificate_arn : (
+    local.validate_certificate ? aws_acm_certificate_validation.this[0].certificate_arn : one(aws_acm_certificate.this[*].arn)
+  )
 }
 
 resource "aws_acm_certificate" "this" {
@@ -38,11 +51,33 @@ resource "aws_acm_certificate" "this" {
   region = "us-east-1"
 
   domain_name       = local.domain_name
+  tags              = var.tags
   validation_method = "DNS"
 
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_route53_record" "certificate_validation" {
+  for_each = local.validate_certificate ? toset([local.domain_name]) : toset([])
+
+  // ACM gives every certificate for the same domain in an account the same
+  // validation record, so another certificate may have created it already.
+  allow_overwrite = true
+  name            = local.certificate_validation_options[each.key].resource_record_name
+  records         = [local.certificate_validation_options[each.key].resource_record_value]
+  ttl             = 60
+  type            = local.certificate_validation_options[each.key].resource_record_type
+  zone_id         = var.route53_zone_id
+}
+
+resource "aws_acm_certificate_validation" "this" {
+  count  = local.validate_certificate ? 1 : 0
+  region = "us-east-1"
+
+  certificate_arn         = aws_acm_certificate.this[0].arn
+  validation_record_fqdns = [for record in aws_route53_record.certificate_validation : record.fqdn]
 }
 
 resource "aws_s3_bucket" "this" {
@@ -444,9 +479,23 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   viewer_certificate {
-    acm_certificate_arn            = var.create_certificate ? aws_acm_certificate.this[0].arn : var.acm_certificate_arn
+    acm_certificate_arn            = local.certificate_arn
     cloudfront_default_certificate = false
     minimum_protocol_version       = "TLSv1.2_2021"
     ssl_support_method             = "sni-only"
+  }
+}
+
+resource "aws_route53_record" "this" {
+  for_each = local.create_dns_records ? toset(["A", "AAAA"]) : toset([])
+
+  name    = local.domain_name
+  type    = each.key
+  zone_id = var.route53_zone_id
+
+  alias {
+    evaluate_target_health = false
+    name                   = aws_cloudfront_distribution.this[0].domain_name
+    zone_id                = aws_cloudfront_distribution.this[0].hosted_zone_id
   }
 }
