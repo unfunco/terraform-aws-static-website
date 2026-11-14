@@ -70,8 +70,20 @@ run "defaults" {
   }
 
   assert {
-    condition     = length(aws_s3_bucket_logging.this) == 0 && length(aws_s3_bucket_policy.logs) == 0
+    condition     = length(aws_s3_bucket_logging.this) == 0
     error_message = "S3 access logging is skipped, because the log bucket has Object Lock."
+  }
+
+  assert {
+    condition = [
+      for statement in jsondecode(data.aws_iam_policy_document.logs[0].json).Statement : statement.Sid
+    ] == ["DenyInsecureTransport"]
+    error_message = "The log bucket's policy only denies insecure transport."
+  }
+
+  assert {
+    condition     = aws_cloudfront_distribution.this[0].default_cache_behavior[0].response_headers_policy_id == "67f7725c-6f97-4210-82d7-5512b31e9d03"
+    error_message = "The managed SecurityHeadersPolicy is attached by default."
   }
 
   assert {
@@ -130,8 +142,18 @@ run "log_bucket_without_object_lock" {
   }
 
   assert {
-    condition     = length(aws_s3_bucket_policy.logs) == 1
+    condition = [
+      for statement in jsondecode(data.aws_iam_policy_document.logs[0].json).Statement : statement.Sid
+    ] == ["AllowS3ServerAccessLogs", "DenyInsecureTransport"]
     error_message = "The log bucket's policy lets S3 deliver server access logs."
+  }
+
+  assert {
+    condition = one([
+      for statement in jsondecode(data.aws_iam_policy_document.logs[0].json).Statement :
+      statement.Resource if statement.Sid == "AllowS3ServerAccessLogs"
+    ]) == "arn:aws:s3:::example.com-logs/example.com/s3/*"
+    error_message = "S3 can only write under the S3 access log prefix."
   }
 }
 
@@ -228,8 +250,10 @@ run "distribution_disabled" {
   }
 
   assert {
-    condition     = length(aws_s3_bucket_policy.this) == 0
-    error_message = "No bucket policy is created without a distribution to grant access to."
+    condition = [
+      for statement in jsondecode(data.aws_iam_policy_document.this[0].json).Statement : statement.Sid
+    ] == ["DenyInsecureTransport"]
+    error_message = "Without a distribution, the bucket policy only denies insecure transport."
   }
 
   assert {
@@ -247,8 +271,18 @@ run "existing_distribution" {
   }
 
   assert {
-    condition     = length(aws_s3_bucket_policy.this) == 1
-    error_message = "The bucket policy grants the existing distribution access."
+    condition = [
+      for statement in jsondecode(data.aws_iam_policy_document.this[0].json).Statement : statement.Sid
+    ] == ["AllowCloudFrontRead", "DenyInsecureTransport"]
+    error_message = "The bucket policy grants the existing distribution access and denies insecure transport."
+  }
+
+  assert {
+    condition = one([
+      for statement in jsondecode(data.aws_iam_policy_document.this[0].json).Statement :
+      statement.Condition.StringEquals["AWS:SourceArn"] if statement.Sid == "AllowCloudFrontRead"
+    ]) == "arn:aws:cloudfront::123456789012:distribution/EDFDVBD6EXAMPLE"
+    error_message = "Read access is limited to the existing distribution."
   }
 }
 
@@ -279,4 +313,51 @@ run "existing_certificate_requires_an_arn" {
   }
 
   expect_failures = [var.acm_certificate_arn]
+}
+
+run "ordered_cache_behaviors_inherit_response_headers" {
+  command = plan
+
+  variables {
+    cloudfront_additional_origins = {
+      assets = {
+        domain_name = "assets.example.com.s3.eu-west-1.amazonaws.com"
+      }
+    }
+
+    cloudfront_ordered_cache_behaviors = [
+      {
+        path_pattern     = "/assets/*"
+        target_origin_id = "assets"
+      },
+      {
+        path_pattern               = "/api/*"
+        response_headers_policy_id = "eaab4381-ed33-4a86-88ca-d9558dc6cd63"
+        target_origin_id           = "assets"
+      },
+    ]
+  }
+
+  assert {
+    condition     = aws_cloudfront_distribution.this[0].ordered_cache_behavior[0].response_headers_policy_id == "67f7725c-6f97-4210-82d7-5512b31e9d03"
+    error_message = "An ordered cache behavior without a policy inherits the distribution's."
+  }
+
+  assert {
+    condition     = aws_cloudfront_distribution.this[0].ordered_cache_behavior[1].response_headers_policy_id == "eaab4381-ed33-4a86-88ca-d9558dc6cd63"
+    error_message = "An ordered cache behavior keeps its own policy."
+  }
+}
+
+run "response_headers_disabled" {
+  command = plan
+
+  variables {
+    cloudfront_response_headers_policy_id = null
+  }
+
+  assert {
+    condition     = coalesce(aws_cloudfront_distribution.this[0].default_cache_behavior[0].response_headers_policy_id, "none") == "none"
+    error_message = "No response headers policy is attached."
+  }
 }
