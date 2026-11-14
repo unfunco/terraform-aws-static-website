@@ -20,7 +20,7 @@ variable "bucket_name" {
 
 variable "log_bucket_name" {
   default     = ""
-  description = "The name of the S3 bucket used for access logs. Leave empty to use \"<bucket_name>-logs\"."
+  description = "The name of the S3 bucket used for access logs. Leave empty to use the bucket name followed by -logs, as the website module does."
   type        = string
 }
 
@@ -36,8 +36,14 @@ variable "create" {
   type        = bool
 }
 
+variable "route53_zone_id" {
+  default     = null
+  description = "The ID of the Route 53 hosted zone passed to the website module, if any. Infrastructure permissions then include managing records in that zone."
+  type        = string
+}
+
 variable "required_resource_tags" {
   default     = {}
-  description = "Required aws:ResourceTag conditions for content permissions. Keys are tag names and values are required tag values."
+  description = "Tags the CloudFront distribution must have for the cache invalidation permission, as aws:ResourceTag conditions. Keys are tag names and values are required tag values. The S3 permissions are scoped to the bucket's ARN instead, because S3 only evaluates resource tags on buckets with ABAC enabled."
   type        = map(string)
 }
