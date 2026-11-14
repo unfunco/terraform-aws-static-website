@@ -13,6 +13,22 @@ provider "aws" {
   skip_requesting_account_id  = true
 }
 
+// These data sources call AWS, so their values are fixed here.
+
+override_data {
+  target = data.aws_caller_identity.this
+  values = {
+    account_id = "123456789012"
+  }
+}
+
+override_data {
+  target = data.aws_canonical_user_id.this
+  values = {
+    id = "79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be"
+  }
+}
+
 variables {
   domain_name = "Example.com"
 }
@@ -31,11 +47,6 @@ run "defaults" {
   }
 
   assert {
-    condition     = aws_s3_bucket_logging.this[0].target_prefix == "example.com/s3/"
-    error_message = "S3 access logs are written under the website bucket's prefix."
-  }
-
-  assert {
     condition     = aws_cloudfront_distribution.this[0].logging_config[0].prefix == "example.com/cloudfront/"
     error_message = "CloudFront access logs are written under the website bucket's prefix."
   }
@@ -48,6 +59,47 @@ run "defaults" {
   assert {
     condition     = length(aws_acm_certificate.this) == 1
     error_message = "A certificate is requested by default."
+  }
+
+  assert {
+    condition = anytrue([
+      for grant in one(aws_s3_bucket_acl.logs[0].access_control_policy).grant :
+      one(grant.grantee).id == "c4c1ede66af53448b93c283ce9448c4ba468c9432aa01d700d3878632f77d2d0" && grant.permission == "FULL_CONTROL"
+    ])
+    error_message = "The log bucket's ACL grants CloudFront's log delivery account FULL_CONTROL."
+  }
+
+  assert {
+    condition     = length(aws_s3_bucket_logging.this) == 0 && length(aws_s3_bucket_policy.logs) == 0
+    error_message = "S3 access logging is skipped, because the log bucket has Object Lock."
+  }
+
+  assert {
+    condition     = one(aws_s3_bucket_lifecycle_configuration.logs[0].rule).noncurrent_version_expiration[0].noncurrent_days == 1
+    error_message = "Expired logs are deleted rather than kept as noncurrent versions."
+  }
+}
+
+run "log_bucket_without_object_lock" {
+  command = plan
+
+  variables {
+    log_bucket_object_lock_enabled = false
+  }
+
+  assert {
+    condition     = aws_s3_bucket_logging.this[0].target_bucket == "example.com-logs"
+    error_message = "S3 access logs go to the log bucket."
+  }
+
+  assert {
+    condition     = aws_s3_bucket_logging.this[0].target_prefix == "example.com/s3/"
+    error_message = "S3 access logs are written under the website bucket's prefix."
+  }
+
+  assert {
+    condition     = length(aws_s3_bucket_policy.logs) == 1
+    error_message = "The log bucket's policy lets S3 deliver server access logs."
   }
 }
 
@@ -111,6 +163,11 @@ run "existing_log_bucket" {
   }
 
   assert {
+    condition     = length(aws_s3_bucket_acl.logs) == 0 && length(aws_s3_bucket_policy.logs) == 0
+    error_message = "The existing bucket's ACL and policy are left alone."
+  }
+
+  assert {
     condition     = aws_cloudfront_distribution.this[0].logging_config[0].bucket == "existing-logs.s3.amazonaws.com"
     error_message = "CloudFront access logs go to the existing bucket."
   }
@@ -141,6 +198,11 @@ run "distribution_disabled" {
   assert {
     condition     = length(aws_s3_bucket_policy.this) == 0
     error_message = "No bucket policy is created without a distribution to grant access to."
+  }
+
+  assert {
+    condition     = length(aws_s3_bucket_acl.logs) == 0
+    error_message = "No ACL grant is needed without a distribution to write logs."
   }
 }
 

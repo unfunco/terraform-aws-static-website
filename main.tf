@@ -9,7 +9,16 @@ locals {
   create_cloudfront_distribution = var.create && var.create_cloudfront_distribution
   create_log_bucket              = var.create && var.enable_logging && var.create_log_bucket
 
-  log_bucket_id = local.create_log_bucket ? aws_s3_bucket.logs[0].id : var.log_bucket_name
+  // CloudFront's legacy standard logging writes with the awslogsdelivery
+  // account, which needs a grant in the log bucket's ACL.
+  create_log_bucket_acl = local.create_log_bucket && local.create_cloudfront_distribution
+
+  // S3 can't deliver server access logs to a bucket with Object Lock.
+  enable_s3_access_logging = var.create && var.enable_logging && !(local.create_log_bucket && var.log_bucket_object_lock_enabled)
+
+  create_log_bucket_policy = local.create_log_bucket && local.enable_s3_access_logging
+
+  log_bucket_id = local.create_log_bucket ? aws_s3_bucket.logs[0].bucket : var.log_bucket_name
   log_bucket_domain = local.create_log_bucket ? aws_s3_bucket.logs[0].bucket_regional_domain_name : format(
     "%s.s3.%s",
     var.log_bucket_name,
@@ -60,7 +69,8 @@ resource "aws_s3_bucket_public_access_block" "this" {
 }
 
 resource "aws_s3_bucket_logging" "this" {
-  count = var.create && var.enable_logging ? 1 : 0
+  count      = local.enable_s3_access_logging ? 1 : 0
+  depends_on = [aws_s3_bucket_policy.logs]
 
   bucket        = aws_s3_bucket.this[0].id
   target_bucket = local.log_bucket_id
@@ -174,10 +184,59 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     id     = "logs"
     status = "Enabled"
 
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
     expiration {
       days = 365
     }
+
+    // The bucket is versioned, so expiring a log only hides it behind a
+    // delete marker. Removing the noncurrent version deletes it.
+    noncurrent_version_expiration {
+      noncurrent_days = 1
+    }
   }
+}
+
+resource "aws_s3_bucket_acl" "logs" {
+  count      = local.create_log_bucket_acl ? 1 : 0
+  depends_on = [aws_s3_bucket_ownership_controls.logs]
+
+  bucket = aws_s3_bucket.logs[0].id
+
+  access_control_policy {
+    owner {
+      id = data.aws_canonical_user_id.this[0].id
+    }
+
+    grant {
+      permission = "FULL_CONTROL"
+
+      grantee {
+        id   = data.aws_canonical_user_id.this[0].id
+        type = "CanonicalUser"
+      }
+    }
+
+    grant {
+      permission = "FULL_CONTROL"
+
+      grantee {
+        id   = data.aws_cloudfront_log_delivery_canonical_user_id.this[0].id
+        type = "CanonicalUser"
+      }
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "logs" {
+  count      = local.create_log_bucket_policy ? 1 : 0
+  depends_on = [aws_s3_bucket_public_access_block.logs]
+
+  bucket = aws_s3_bucket.logs[0].id
+  policy = data.aws_iam_policy_document.logs[0].json
 }
 
 resource "aws_s3_bucket_versioning" "logs" {
@@ -217,6 +276,9 @@ resource "aws_cloudfront_origin_access_control" "this" {
 
 resource "aws_cloudfront_distribution" "this" {
   count = local.create_cloudfront_distribution ? 1 : 0
+
+  // CloudFront checks the log bucket's ACL when logging is configured.
+  depends_on = [aws_s3_bucket_acl.logs]
 
   aliases             = [local.domain_name]
   comment             = "CloudFront distribution for ${local.bucket_name}."
