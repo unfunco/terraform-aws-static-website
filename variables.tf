@@ -121,7 +121,7 @@ variable "domain_name" {
 
 variable "enable_logging" {
   default     = true
-  description = "Whether to enable access logging for S3 and CloudFront."
+  description = "Whether to enable access logging for CloudFront and S3. S3 server access logs are skipped when the module creates the log bucket with Object Lock, because S3 can't deliver them to such a bucket."
   type        = bool
 }
 
@@ -173,7 +173,7 @@ variable "log_bucket_object_lock_days" {
 
 variable "log_bucket_object_lock_enabled" {
   default     = true
-  description = "Whether to enable S3 Object Lock on the logging bucket. This only applies at bucket creation time."
+  description = "Whether to enable S3 Object Lock on the logging bucket. This only applies at bucket creation time. S3 server access logs can't be delivered to a bucket with Object Lock, so only CloudFront logs are written when this is true."
   type        = bool
 }
 
