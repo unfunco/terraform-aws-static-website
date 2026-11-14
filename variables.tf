@@ -7,7 +7,7 @@ variable "acm_certificate_arn" {
   type        = string
 
   validation {
-    condition     = !var.create || !var.create_cloudfront_distribution || var.create_certificate || trim(var.acm_certificate_arn) != ""
+    condition     = !var.create || !var.create_cloudfront_distribution || var.create_certificate || trimspace(var.acm_certificate_arn) != ""
     error_message = "Set acm_certificate_arn when create_certificate is false and create_cloudfront_distribution is true."
   }
 }
@@ -151,8 +151,13 @@ variable "index_document" {
 
 variable "log_bucket_name" {
   default     = ""
-  description = "The name of the S3 bucket for storing access logs."
+  description = "The name of the S3 bucket for storing access logs. Required when create_log_bucket is false and enable_logging is true."
   type        = string
+
+  validation {
+    condition     = !var.create || !var.enable_logging || var.create_log_bucket || trimspace(var.log_bucket_name) != ""
+    error_message = "Set log_bucket_name when create_log_bucket is false and enable_logging is true."
+  }
 }
 
 variable "log_bucket_object_lock_days" {

@@ -5,8 +5,16 @@ locals {
   bucket_name = var.bucket_name == "" ? local.domain_name : var.bucket_name
   domain_name = lower(var.domain_name)
 
-  log_bucket_id            = var.create && var.create_log_bucket ? aws_s3_bucket.logs[0].id : var.log_bucket_name
-  log_bucket_domain        = var.create && var.create_log_bucket ? aws_s3_bucket.logs[0].bucket_regional_domain_name : "${var.log_bucket_name}.s3.${data.aws_partition.this[0].dns_suffix}"
+  create_bucket_policy           = var.create && (var.create_cloudfront_distribution || var.cloudfront_distribution_arn != "")
+  create_cloudfront_distribution = var.create && var.create_cloudfront_distribution
+  create_log_bucket              = var.create && var.enable_logging && var.create_log_bucket
+
+  log_bucket_id = local.create_log_bucket ? aws_s3_bucket.logs[0].id : var.log_bucket_name
+  log_bucket_domain = local.create_log_bucket ? aws_s3_bucket.logs[0].bucket_regional_domain_name : format(
+    "%s.s3.%s",
+    var.log_bucket_name,
+    try(data.aws_partition.this[0].dns_suffix, "amazonaws.com"),
+  )
   log_bucket_target_prefix = var.log_bucket_target_prefix == "" ? local.bucket_name : var.log_bucket_target_prefix
 }
 
@@ -25,7 +33,7 @@ resource "aws_acm_certificate" "this" {
 resource "aws_s3_bucket" "this" {
   count = var.create ? 1 : 0
 
-  bucket        = var.bucket_name == "" ? local.domain_name : var.bucket_name
+  bucket        = local.bucket_name
   force_destroy = var.force_destroy
   tags          = var.tags
 }
@@ -60,7 +68,7 @@ resource "aws_s3_bucket_logging" "this" {
 }
 
 resource "aws_s3_bucket_policy" "this" {
-  count = var.create ? 1 : 0
+  count = local.create_bucket_policy ? 1 : 0
 
   bucket = aws_s3_bucket.this[0].id
   policy = data.aws_iam_policy_document.this[0].json
@@ -129,16 +137,16 @@ resource "aws_s3_object" "index_document" {
 }
 
 resource "aws_s3_bucket" "logs" {
-  count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
+  count = local.create_log_bucket ? 1 : 0
 
-  bucket              = var.log_bucket_name == "" ? join("-", [aws_s3_bucket.this[0].id, "logs"]) : var.log_bucket_name
+  bucket              = var.log_bucket_name == "" ? "${local.bucket_name}-logs" : var.log_bucket_name
   force_destroy       = var.force_destroy
   object_lock_enabled = var.log_bucket_object_lock_enabled
   tags                = var.tags
 }
 
 resource "aws_s3_bucket_ownership_controls" "logs" {
-  count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
+  count = local.create_log_bucket ? 1 : 0
 
   bucket = aws_s3_bucket.logs[0].id
 
@@ -148,7 +156,7 @@ resource "aws_s3_bucket_ownership_controls" "logs" {
 }
 
 resource "aws_s3_bucket_public_access_block" "logs" {
-  count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
+  count = local.create_log_bucket ? 1 : 0
 
   block_public_acls       = true
   block_public_policy     = true
@@ -158,7 +166,7 @@ resource "aws_s3_bucket_public_access_block" "logs" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "logs" {
-  count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
+  count = local.create_log_bucket ? 1 : 0
 
   bucket = aws_s3_bucket.logs[0].id
 
@@ -173,7 +181,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
 }
 
 resource "aws_s3_bucket_versioning" "logs" {
-  count = var.create && var.enable_logging && var.create_log_bucket ? 1 : 0
+  count = local.create_log_bucket ? 1 : 0
 
   bucket = aws_s3_bucket.logs[0].id
 
@@ -183,7 +191,7 @@ resource "aws_s3_bucket_versioning" "logs" {
 }
 
 resource "aws_s3_bucket_object_lock_configuration" "logs" {
-  count      = var.create && var.enable_logging && var.create_log_bucket && var.log_bucket_object_lock_enabled ? 1 : 0
+  count      = local.create_log_bucket && var.log_bucket_object_lock_enabled ? 1 : 0
   depends_on = [aws_s3_bucket_versioning.logs]
 
   bucket              = aws_s3_bucket.logs[0].id
@@ -198,9 +206,9 @@ resource "aws_s3_bucket_object_lock_configuration" "logs" {
 }
 
 resource "aws_cloudfront_origin_access_control" "this" {
-  count = var.create && var.create_cloudfront_distribution ? 1 : 0
+  count = local.create_cloudfront_distribution ? 1 : 0
 
-  name                              = aws_s3_bucket.this[0].id
+  name                              = local.bucket_name
   description                       = "OAC for ${local.domain_name}."
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
@@ -208,10 +216,10 @@ resource "aws_cloudfront_origin_access_control" "this" {
 }
 
 resource "aws_cloudfront_distribution" "this" {
-  count = var.create && var.create_cloudfront_distribution ? 1 : 0
+  count = local.create_cloudfront_distribution ? 1 : 0
 
   aliases             = [local.domain_name]
-  comment             = "CloudFront distribution for ${aws_s3_bucket.this[0].id}."
+  comment             = "CloudFront distribution for ${local.bucket_name}."
   default_root_object = var.index_document
   enabled             = true
   http_version        = "http2and3"
@@ -242,7 +250,7 @@ resource "aws_cloudfront_distribution" "this" {
     cached_methods             = ["GET", "HEAD"]
     compress                   = true
     response_headers_policy_id = var.cloudfront_response_headers_policy_id
-    target_origin_id           = aws_s3_bucket.this[0].id
+    target_origin_id           = local.bucket_name
     viewer_protocol_policy     = "redirect-to-https"
   }
 
@@ -273,7 +281,7 @@ resource "aws_cloudfront_distribution" "this" {
 
   origin {
     domain_name              = aws_s3_bucket.this[0].bucket_regional_domain_name
-    origin_id                = aws_s3_bucket.this[0].id
+    origin_id                = local.bucket_name
     origin_access_control_id = aws_cloudfront_origin_access_control.this[0].id
   }
 

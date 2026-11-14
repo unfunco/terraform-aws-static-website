@@ -6,7 +6,7 @@ data "aws_partition" "this" {
 }
 
 data "aws_iam_policy_document" "this" {
-  count = var.create && (var.create_cloudfront_distribution || var.cloudfront_distribution_arn != "") ? 1 : 0
+  count = local.create_bucket_policy ? 1 : 0
 
   statement {
     actions = ["s3:GetObject"]
