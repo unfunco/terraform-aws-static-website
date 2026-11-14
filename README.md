@@ -27,6 +27,11 @@ module "website" {
 }
 ```
 
+The module uses the AWS provider configuration that it inherits from the
+calling module, so the S3 buckets are created in that provider's region and
+account. The ACM certificate is always requested in us-east-1, because
+CloudFront only accepts certificates from that region.
+
 #### IAM
 
 Use the bundled `modules/ci-iam-policy` module to generate an inline IAM policy
