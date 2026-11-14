@@ -464,3 +464,75 @@ run "pretty_urls_rejects_unknown_styles" {
 
   expect_failures = [var.pretty_urls]
 }
+
+run "route53_disabled_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(aws_route53_record.this) == 0 && length(aws_route53_record.certificate_validation) == 0 && length(aws_acm_certificate_validation.this) == 0
+    error_message = "No DNS records are created without a hosted zone."
+  }
+}
+
+run "route53" {
+  command = plan
+
+  variables {
+    route53_zone_id = "Z0123456789ABCDEFGHIJ"
+  }
+
+  assert {
+    condition     = keys(aws_route53_record.certificate_validation) == ["example.com"]
+    error_message = "The certificate is validated with a record in the zone."
+  }
+
+  assert {
+    condition     = aws_route53_record.certificate_validation["example.com"].allow_overwrite
+    error_message = "The validation record can be shared with other certificates for the domain."
+  }
+
+  assert {
+    condition     = length(aws_acm_certificate_validation.this) == 1
+    error_message = "The module waits for the certificate to be issued."
+  }
+
+  assert {
+    condition     = toset(keys(aws_route53_record.this)) == toset(["A", "AAAA"])
+    error_message = "A and AAAA alias records are created."
+  }
+
+  assert {
+    condition     = aws_route53_record.this["AAAA"].name == "example.com" && aws_route53_record.this["AAAA"].zone_id == "Z0123456789ABCDEFGHIJ"
+    error_message = "The alias records are for the domain name in the zone."
+  }
+}
+
+run "route53_with_existing_certificate" {
+  command = plan
+
+  variables {
+    acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+    create_certificate  = false
+    route53_zone_id     = "Z0123456789ABCDEFGHIJ"
+  }
+
+  assert {
+    condition     = length(aws_route53_record.certificate_validation) == 0 && length(aws_acm_certificate_validation.this) == 0
+    error_message = "An existing certificate isn't validated."
+  }
+
+  assert {
+    condition     = length(aws_route53_record.this) == 2
+    error_message = "Alias records are still created."
+  }
+}
+
+run "route53_rejects_empty_zone_ids" {
+  command = plan
+
+  variables {
+    route53_zone_id = " "
+  }
+
+  expect_failures = [var.route53_zone_id]
+}

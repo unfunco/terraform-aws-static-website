@@ -51,6 +51,28 @@ and SvelteKit static exports write `about.html`. Paths with a file extension,
 and anything under `/.well-known/`, are served as they are. The function also
 runs for ordered cache behaviors whose origin is the website bucket.
 
+#### DNS
+
+CloudFront won't accept a certificate until it has been issued. Set
+`route53_zone_id` to the hosted zone for `domain_name`, and the module creates
+the certificate's validation record, waits for the certificate to be issued
+before creating the distribution, and points A and AAAA alias records at the
+distribution.
+
+Without a hosted zone, the first apply fails with `InvalidViewerCertificate`.
+Create the record from the `certificate_domain_validation_options` output with
+your DNS provider, wait for the certificate to be issued, and apply again.
+
+Terraform won't overwrite A or AAAA records that already exist. To hand
+existing records to the module, import them:
+
+```terraform
+import {
+  to = module.website.aws_route53_record.this["A"]
+  id = "Z0123456789ABCDEFGHIJ_example.com_A"
+}
+```
+
 #### IAM
 
 Use the bundled `modules/ci-iam-policy` module to generate an inline IAM policy
@@ -94,9 +116,12 @@ module "oidc_github" {
 | Name                                                                                                                                                                           | Type        |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
 | [aws_acm_certificate.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/acm_certificate)                                                        | resource    |
+| [aws_acm_certificate_validation.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/acm_certificate_validation)                                  | resource    |
 | [aws_cloudfront_distribution.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution)                                        | resource    |
 | [aws_cloudfront_function.pretty_urls](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_function)                                         | resource    |
 | [aws_cloudfront_origin_access_control.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_control)                      | resource    |
+| [aws_route53_record.certificate_validation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record)                                        | resource    |
+| [aws_route53_record.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record)                                                          | resource    |
 | [aws_s3_bucket.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket)                                                                    | resource    |
 | [aws_s3_bucket.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket)                                                                    | resource    |
 | [aws_s3_bucket_acl.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl)                                                            | resource    |
@@ -153,6 +178,7 @@ module "oidc_github" {
 | log_bucket_target_prefix              | The prefix for log objects in the logging bucket.                                                                                                                                                                                                                                                                                                                                                                         | `string`                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `""`                                     |    no    |
 | noncurrent_version_expiration_days    | The number of days to keep noncurrent versions of website objects, which every deploy that changes or deletes an object creates. Set to null to keep them indefinitely and leave the bucket's lifecycle configuration unmanaged.                                                                                                                                                                                          | `number`                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `30`                                     |    no    |
 | pretty_urls                           | Serves pages without .html in their URLs, using a CloudFront Function. Set to "directory" when pages are built as about/index.html, so /about/ serves that page and /about redirects to /about/, or to "file" when pages are built as about.html, so /about serves that page. In both styles, a path ending in a slash serves the index document in that directory. Leave null to serve objects only by their exact keys. | `string`                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `null`                                   |    no    |
+| route53_zone_id                       | The ID of the Route 53 hosted zone for domain_name. When set, the module validates the certificate with a DNS record in the zone and waits for it to be issued before creating the distribution, and creates A and AAAA alias records for the distribution.                                                                                                                                                               | `string`                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `null`                                   |    no    |
 | tags                                  | The tags to apply to all taggable resources.                                                                                                                                                                                                                                                                                                                                                                              | `map(string)`                                                                                                                                                                                                                                                                                                                                                                                                                                              | `{}`                                     |    no    |
 
 ### Outputs
