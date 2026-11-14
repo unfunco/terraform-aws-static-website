@@ -101,9 +101,9 @@ module "ci_iam_policy_deploy" {
 ```terraform
 module "oidc_github" {
   source  = "unfunco/oidc-github/aws"
-  version = "2.0.2"
+  version = "3.1.0"
 
-  github_repositories = ["unfunco/unfun.co"]
+  github_subjects = ["unfunco/unfun.co"]
 
   iam_role_inline_policies = {
     deploy = module.ci_iam_policy_deploy.policy_document
