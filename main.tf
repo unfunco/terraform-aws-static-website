@@ -5,7 +5,6 @@ locals {
   bucket_name = var.bucket_name == "" ? local.domain_name : var.bucket_name
   domain_name = lower(var.domain_name)
 
-  create_bucket_policy           = var.create && (var.create_cloudfront_distribution || var.cloudfront_distribution_arn != "")
   create_cloudfront_distribution = var.create && var.create_cloudfront_distribution
   create_log_bucket              = var.create && var.enable_logging && var.create_log_bucket
 
@@ -16,7 +15,13 @@ locals {
   // S3 can't deliver server access logs to a bucket with Object Lock.
   enable_s3_access_logging = var.create && var.enable_logging && !(local.create_log_bucket && var.log_bucket_object_lock_enabled)
 
-  create_log_bucket_policy = local.create_log_bucket && local.enable_s3_access_logging
+  allow_s3_access_logs = local.create_log_bucket && local.enable_s3_access_logging
+
+  // The website bucket grants read access to a distribution, either the
+  // module's or an existing one.
+  grant_cloudfront_access = var.create_cloudfront_distribution || var.cloudfront_distribution_arn != ""
+
+  log_bucket_name = var.log_bucket_name == "" ? "${local.bucket_name}-logs" : var.log_bucket_name
 
   log_bucket_id = local.create_log_bucket ? aws_s3_bucket.logs[0].bucket : var.log_bucket_name
   log_bucket_domain = local.create_log_bucket ? aws_s3_bucket.logs[0].bucket_regional_domain_name : format(
@@ -78,7 +83,7 @@ resource "aws_s3_bucket_logging" "this" {
 }
 
 resource "aws_s3_bucket_policy" "this" {
-  count = local.create_bucket_policy ? 1 : 0
+  count = var.create ? 1 : 0
 
   bucket = aws_s3_bucket.this[0].id
   policy = data.aws_iam_policy_document.this[0].json
@@ -174,7 +179,7 @@ resource "aws_s3_object" "index_document" {
 resource "aws_s3_bucket" "logs" {
   count = local.create_log_bucket ? 1 : 0
 
-  bucket              = var.log_bucket_name == "" ? "${local.bucket_name}-logs" : var.log_bucket_name
+  bucket              = local.log_bucket_name
   force_destroy       = var.force_destroy
   object_lock_enabled = var.log_bucket_object_lock_enabled
   tags                = var.tags
@@ -257,7 +262,7 @@ resource "aws_s3_bucket_acl" "logs" {
 }
 
 resource "aws_s3_bucket_policy" "logs" {
-  count      = local.create_log_bucket_policy ? 1 : 0
+  count      = local.create_log_bucket ? 1 : 0
   depends_on = [aws_s3_bucket_public_access_block.logs]
 
   bucket = aws_s3_bucket.logs[0].id
@@ -351,7 +356,7 @@ resource "aws_cloudfront_distribution" "this" {
       compress                   = ordered_cache_behavior.value.compress
       origin_request_policy_id   = try(ordered_cache_behavior.value.origin_request_policy_id, null)
       path_pattern               = ordered_cache_behavior.value.path_pattern
-      response_headers_policy_id = try(ordered_cache_behavior.value.response_headers_policy_id, var.cloudfront_response_headers_policy_id)
+      response_headers_policy_id = ordered_cache_behavior.value.response_headers_policy_id != null ? ordered_cache_behavior.value.response_headers_policy_id : var.cloudfront_response_headers_policy_id
       target_origin_id           = ordered_cache_behavior.value.target_origin_id
       viewer_protocol_policy     = ordered_cache_behavior.value.viewer_protocol_policy
     }

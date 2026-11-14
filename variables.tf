@@ -67,8 +67,8 @@ variable "cloudfront_ordered_cache_behaviors" {
 }
 
 variable "cloudfront_response_headers_policy_id" {
-  default     = null
-  description = "The ID of a response headers policy to attach to the CloudFront distribution."
+  default     = "67f7725c-6f97-4210-82d7-5512b31e9d03" # Managed-SecurityHeadersPolicy
+  description = "The ID of a response headers policy to attach to the CloudFront distribution, and to ordered cache behaviors that don't set their own. Defaults to the AWS managed SecurityHeadersPolicy, which adds HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy and X-XSS-Protection headers. Set to null to add no headers."
   type        = string
 }
 
