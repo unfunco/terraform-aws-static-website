@@ -80,6 +80,38 @@ run "defaults" {
   }
 }
 
+run "noncurrent_versions_expire" {
+  command = plan
+
+  assert {
+    condition     = one(aws_s3_bucket_lifecycle_configuration.this[0].rule).noncurrent_version_expiration[0].noncurrent_days == 30
+    error_message = "Noncurrent versions of website objects expire after 30 days by default."
+  }
+}
+
+run "noncurrent_versions_kept" {
+  command = plan
+
+  variables {
+    noncurrent_version_expiration_days = null
+  }
+
+  assert {
+    condition     = length(aws_s3_bucket_lifecycle_configuration.this) == 0
+    error_message = "The website bucket's lifecycle configuration is left unmanaged."
+  }
+}
+
+run "noncurrent_versions_need_a_day" {
+  command = plan
+
+  variables {
+    noncurrent_version_expiration_days = 0
+  }
+
+  expect_failures = [var.noncurrent_version_expiration_days]
+}
+
 run "log_bucket_without_object_lock" {
   command = plan
 

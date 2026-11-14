@@ -194,6 +194,17 @@ variable "log_bucket_target_prefix" {
   type        = string
 }
 
+variable "noncurrent_version_expiration_days" {
+  default     = 30
+  description = "The number of days to keep noncurrent versions of website objects, which every deploy that changes or deletes an object creates. Set to null to keep them indefinitely and leave the bucket's lifecycle configuration unmanaged."
+  type        = number
+
+  validation {
+    condition     = var.noncurrent_version_expiration_days == null ? true : var.noncurrent_version_expiration_days >= 1
+    error_message = "Set noncurrent_version_expiration_days to at least 1, or to null."
+  }
+}
+
 variable "tags" {
   default     = {}
   description = "The tags to apply to all taggable resources."

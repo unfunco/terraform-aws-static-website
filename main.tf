@@ -94,6 +94,31 @@ resource "aws_s3_bucket_versioning" "this" {
   }
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "this" {
+  count = var.create && var.noncurrent_version_expiration_days != null ? 1 : 0
+
+  bucket = aws_s3_bucket.this[0].id
+
+  rule {
+    id     = "website"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
+    // Deploys that delete objects leave delete markers behind, which can
+    // go once the versions under them have expired.
+    expiration {
+      expired_object_delete_marker = true
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = var.noncurrent_version_expiration_days
+    }
+  }
+}
+
 resource "aws_s3_object" "error_document" {
   count = var.create && var.create_default_documents ? 1 : 0
 
