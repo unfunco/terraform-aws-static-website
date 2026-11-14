@@ -217,7 +217,6 @@ resource "aws_cloudfront_distribution" "this" {
   http_version        = "http2and3"
   is_ipv6_enabled     = true
   price_class         = var.cloudfront_distribution_price_class
-  provider            = aws.us_east_1
   retain_on_delete    = var.cloudfront_retain_on_delete
   tags                = var.tags
   wait_for_deployment = true
