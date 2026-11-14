@@ -80,7 +80,9 @@ document for your CI role. The module has two boolean inputs to control which
 permissions are included, `attach_content_permissions` is enough for deploy jobs
 that sync website content and invalidate CloudFront, while
 `attach_infrastructure_permissions` is for Terraform jobs that create or update
-AWS resources.
+AWS resources. When the website module manages DNS records, pass the same
+`route53_zone_id` to the policy module, so Terraform jobs can change records in
+that zone.
 
 ```terraform
 module "ci_iam_policy_deploy" {
