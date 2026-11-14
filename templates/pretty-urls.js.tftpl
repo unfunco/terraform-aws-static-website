@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2026 Daniel Morris <daniel@honestempire.com>
+// SPDX-License-Identifier: MIT
+
+// Maps extensionless request paths onto the HTML documents in the bucket.
+// Terraform renders this template for aws_cloudfront_function.pretty_urls.
+
+var indexDocument = ${jsonencode(index_document)};
+var style = ${jsonencode(style)};
+
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+
+  // Well-known URIs are often extensionless files, so leave them alone.
+  if (uri.indexOf('/.well-known/') === 0) {
+    return request;
+  }
+
+  // A directory is always served by its index document.
+  if (uri.charAt(uri.length - 1) === '/') {
+    request.uri = uri + indexDocument;
+    return request;
+  }
+
+  // A path whose last segment has an extension is served as it is.
+  if (uri.slice(uri.lastIndexOf('/') + 1).indexOf('.') !== -1) {
+    return request;
+  }
+
+  if (style === 'file') {
+    request.uri = uri + '.html';
+    return request;
+  }
+
+  // Redirect to the trailing slash form, so relative links resolve against
+  // the directory. Collapsing leading slashes keeps the Location header on
+  // this site, //example.com/page/ would otherwise point at another host.
+  return {
+    statusCode: 301,
+    statusDescription: 'Moved Permanently',
+    headers: {
+      location: {
+        value: '/' + uri.replace(/^[\/\\]+/, '') + '/' + search(request.querystring),
+      },
+    },
+  };
+}
+
+function search(querystring) {
+  var params = [];
+
+  for (var name in querystring) {
+    var values = querystring[name].multiValue || [querystring[name]];
+
+    for (var i = 0; i < values.length; i++) {
+      params.push(values[i].value === '' ? name : name + '=' + values[i].value);
+    }
+  }
+
+  return params.length > 0 ? '?' + params.join('&') : '';
+}

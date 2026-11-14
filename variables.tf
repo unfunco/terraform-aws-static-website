@@ -145,7 +145,7 @@ variable "force_destroy" {
 
 variable "index_document" {
   default     = "index.html"
-  description = "The path to the index document returned for directory requests."
+  description = "The name of the index document. CloudFront serves it for the root of the site, and, when pretty_urls is set, for every path that ends in a slash."
   type        = string
 }
 
@@ -202,6 +202,17 @@ variable "noncurrent_version_expiration_days" {
   validation {
     condition     = var.noncurrent_version_expiration_days == null ? true : var.noncurrent_version_expiration_days >= 1
     error_message = "Set noncurrent_version_expiration_days to at least 1, or to null."
+  }
+}
+
+variable "pretty_urls" {
+  default     = null
+  description = "Serves pages without .html in their URLs, using a CloudFront Function. Set to \"directory\" when pages are built as about/index.html, so /about/ serves that page and /about redirects to /about/, or to \"file\" when pages are built as about.html, so /about serves that page. In both styles, a path ending in a slash serves the index document in that directory. Leave null to serve objects only by their exact keys."
+  type        = string
+
+  validation {
+    condition     = var.pretty_urls == null ? true : contains(["directory", "file"], var.pretty_urls)
+    error_message = "Set pretty_urls to \"directory\", \"file\" or null."
   }
 }
 

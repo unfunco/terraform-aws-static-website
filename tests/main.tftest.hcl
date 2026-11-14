@@ -361,3 +361,106 @@ run "response_headers_disabled" {
     error_message = "No response headers policy is attached."
   }
 }
+
+run "pretty_urls_disabled_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(aws_cloudfront_function.pretty_urls) == 0
+    error_message = "No function is created by default."
+  }
+
+  assert {
+    condition     = length(aws_cloudfront_distribution.this[0].default_cache_behavior[0].function_association) == 0
+    error_message = "The default cache behavior has no function by default."
+  }
+}
+
+run "pretty_urls_directory" {
+  command = plan
+
+  variables {
+    cloudfront_additional_origins = {
+      api = {
+        domain_name = "api.example.com"
+      }
+    }
+
+    cloudfront_ordered_cache_behaviors = [
+      {
+        path_pattern     = "/docs/*"
+        target_origin_id = "example.com"
+      },
+      {
+        path_pattern     = "/api/*"
+        target_origin_id = "api"
+      },
+    ]
+
+    pretty_urls = "directory"
+  }
+
+  assert {
+    condition     = aws_cloudfront_function.pretty_urls[0].name == "example-com-pretty-urls"
+    error_message = "The function is named after the bucket."
+  }
+
+  assert {
+    condition     = strcontains(aws_cloudfront_function.pretty_urls[0].code, "var indexDocument = \"index.html\";") && strcontains(aws_cloudfront_function.pretty_urls[0].code, "var style = \"directory\";")
+    error_message = "The function is rendered with the index document and style."
+  }
+
+  assert {
+    condition     = one(aws_cloudfront_distribution.this[0].default_cache_behavior[0].function_association).event_type == "viewer-request"
+    error_message = "The function runs on viewer requests for the default cache behavior."
+  }
+
+  assert {
+    condition     = length(aws_cloudfront_distribution.this[0].ordered_cache_behavior[0].function_association) == 1
+    error_message = "An ordered cache behavior for the website bucket runs the function."
+  }
+
+  assert {
+    condition     = length(aws_cloudfront_distribution.this[0].ordered_cache_behavior[1].function_association) == 0
+    error_message = "An ordered cache behavior for another origin doesn't."
+  }
+}
+
+run "pretty_urls_file" {
+  command = plan
+
+  variables {
+    index_document = "home.html"
+    pretty_urls    = "file"
+  }
+
+  assert {
+    condition     = strcontains(aws_cloudfront_function.pretty_urls[0].code, "var indexDocument = \"home.html\";") && strcontains(aws_cloudfront_function.pretty_urls[0].code, "var style = \"file\";")
+    error_message = "The function is rendered with the index document and style."
+  }
+}
+
+run "pretty_urls_name_is_truncated" {
+  command = plan
+
+  variables {
+    domain_name    = "a-very-long-subdomain-name-for-testing-the-module.example.co.uk"
+    enable_logging = false
+    pretty_urls    = "directory"
+  }
+
+  assert {
+    condition     = length(aws_cloudfront_function.pretty_urls[0].name) <= 64
+    error_message = "Function names are limited to 64 characters."
+  }
+}
+
+run "pretty_urls_rejects_unknown_styles" {
+  command = plan
+
+  variables {
+    pretty_urls = "extensionless"
+  }
+
+  expect_failures = [var.pretty_urls]
+}

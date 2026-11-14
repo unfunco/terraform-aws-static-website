@@ -7,6 +7,7 @@ locals {
 
   create_cloudfront_distribution = var.create && var.create_cloudfront_distribution
   create_log_bucket              = var.create && var.enable_logging && var.create_log_bucket
+  create_pretty_urls_function    = local.create_cloudfront_distribution && var.pretty_urls != null
 
   // CloudFront's legacy standard logging writes with the awslogsdelivery
   // account, which needs a grant in the log bucket's ACL.
@@ -304,6 +305,20 @@ resource "aws_cloudfront_origin_access_control" "this" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_cloudfront_function" "pretty_urls" {
+  count = local.create_pretty_urls_function ? 1 : 0
+
+  comment = "Pretty URLs for ${local.domain_name}."
+  name    = substr("${replace(local.bucket_name, ".", "-")}-pretty-urls", 0, 64)
+  publish = true
+  runtime = "cloudfront-js-2.0"
+
+  code = templatefile("${path.module}/templates/pretty-urls.js.tftpl", {
+    index_document = var.index_document
+    style          = var.pretty_urls
+  })
+}
+
 resource "aws_cloudfront_distribution" "this" {
   count = local.create_cloudfront_distribution ? 1 : 0
 
@@ -344,6 +359,15 @@ resource "aws_cloudfront_distribution" "this" {
     response_headers_policy_id = var.cloudfront_response_headers_policy_id
     target_origin_id           = local.bucket_name
     viewer_protocol_policy     = "redirect-to-https"
+
+    dynamic "function_association" {
+      for_each = local.create_pretty_urls_function ? [aws_cloudfront_function.pretty_urls[0].arn] : []
+
+      content {
+        event_type   = "viewer-request"
+        function_arn = function_association.value
+      }
+    }
   }
 
   dynamic "ordered_cache_behavior" {
@@ -359,6 +383,17 @@ resource "aws_cloudfront_distribution" "this" {
       response_headers_policy_id = ordered_cache_behavior.value.response_headers_policy_id != null ? ordered_cache_behavior.value.response_headers_policy_id : var.cloudfront_response_headers_policy_id
       target_origin_id           = ordered_cache_behavior.value.target_origin_id
       viewer_protocol_policy     = ordered_cache_behavior.value.viewer_protocol_policy
+
+      // Behaviors that serve the website bucket rewrite URLs the same way
+      // as the default behavior.
+      dynamic "function_association" {
+        for_each = local.create_pretty_urls_function && ordered_cache_behavior.value.target_origin_id == local.bucket_name ? [aws_cloudfront_function.pretty_urls[0].arn] : []
+
+        content {
+          event_type   = "viewer-request"
+          function_arn = function_association.value
+        }
+      }
     }
   }
 
