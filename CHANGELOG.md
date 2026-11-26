@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/unfunco/terraform-aws-static-website/compare/v0.6.0...v0.6.1) (2026-11-26)
+
+
+### 🧹 Miscellaneous
+
+* Replace Dependabot reviewers with CODEOWNERS ([#64](https://github.com/unfunco/terraform-aws-static-website/issues/64)) ([d7c84cd](https://github.com/unfunco/terraform-aws-static-website/commit/d7c84cd5119e111dbf070a852a7e77396acb042d))
+* Standardise changelog emoji sections ([#66](https://github.com/unfunco/terraform-aws-static-website/issues/66)) ([d278a80](https://github.com/unfunco/terraform-aws-static-website/commit/d278a8043f303ff901bddd6093338ae0e4d32600))
+
 ## [0.6.0](https://github.com/unfunco/terraform-aws-static-website/compare/v0.5.0...v0.6.0) (2026-11-14)
 
 
