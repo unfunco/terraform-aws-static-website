@@ -6,4 +6,3 @@ workflows:
     '.github/workflows/ci.yaml': []
     '.github/workflows/pull_request.yaml': []
     '.github/workflows/pull_request_label.yaml': []
-    '.github/workflows/sync_labels.yaml': []
